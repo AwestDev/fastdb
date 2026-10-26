@@ -1,0 +1,377 @@
+<UserControl x:Class="FastDbExplorer.Wpf.Views.MonitorEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:FastDbExplorer.Wpf.Localization"
+             xmlns:ctrl="clr-namespace:FastDbExplorer.Wpf.Controls"
+             xmlns:svc="clr-namespace:FastDbExplorer.Wpf.Services">
+  <UserControl.Resources>
+    <svc:HexColorBrushConverter x:Key="HexColorBrush" />
+    <!-- Square picker tile (icon / colour), the same look as the map's layer picker -->
+    <Style x:Key="ChoiceButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
+      <Setter Property="Width" Value="34" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Box" CornerRadius="9" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="Background" Value="{DynamicResource SurfaceAltBrush}" /></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+          <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+    <DataTemplate x:Key="TextMonitorValueTemplate">
+      <TextBox FlowDirection="LeftToRight" Padding="10,8" ToolTip="{x:Static l:Strings.ValueTip}"
+               Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+    </DataTemplate>
+    <DataTemplate x:Key="DateTimeMonitorValueTemplate">
+      <ctrl:PersianDateTimeValueBox Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTip="{x:Static l:Strings.ValueTip}" />
+    </DataTemplate>
+    <DataTemplate x:Key="TextMonitorValue2Template">
+      <TextBox FlowDirection="LeftToRight" Padding="10,8" Width="110" ToolTip="{x:Static l:Strings.Value2Tip}"
+               Text="{Binding Value2, UpdateSourceTrigger=PropertyChanged}" />
+    </DataTemplate>
+    <DataTemplate x:Key="DateTimeMonitorValue2Template">
+      <ctrl:PersianDateTimeValueBox Width="130" Value="{Binding Value2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTip="{x:Static l:Strings.Value2Tip}" />
+    </DataTemplate>
+  </UserControl.Resources>
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Width="760" HorizontalAlignment="Center" Margin="0,20,0,28">
+      <TextBlock Text="{Binding Title}" Style="{StaticResource Title}" Margin="0,0,0,16" />
+
+      <ProgressBar IsIndeterminate="True" Margin="0,0,0,12" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+
+      <TextBlock Text="{x:Static l:MonitoringStrings.Name}" Style="{StaticResource FieldLabel}" />
+      <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" />
+
+      <!-- Target table -->
+      <Grid Margin="0,0,0,16" Visibility="{Binding IsNew, Converter={StaticResource BoolToVis}}">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,8,0">
+          <TextBlock Text="{x:Static l:MonitoringStrings.Database}" Style="{StaticResource FieldLabel}" />
+          <ComboBox FlowDirection="LeftToRight" ItemsSource="{Binding Databases}" SelectedItem="{Binding SelectedDatabase}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+          <TextBlock Text="{x:Static l:MonitoringStrings.Table}" Style="{StaticResource FieldLabel}" />
+          <ComboBox FlowDirection="LeftToRight" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}">
+            <!-- Explicit template: the global ComboBox style ignores DisplayMemberPath in the selection box. -->
+            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding FullName}" /></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+      <StackPanel Margin="0,0,0,16" Visibility="{Binding IsExisting, Converter={StaticResource BoolToVis}}">
+        <TextBlock Text="{x:Static l:MonitoringStrings.Target}" Style="{StaticResource FieldLabel}" />
+        <TextBlock Text="{Binding TargetText}" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontWeight="SemiBold" />
+      </StackPanel>
+
+      <!-- Watermark column -->
+      <TextBlock Text="{x:Static l:MonitoringStrings.WatermarkColumn}" Style="{StaticResource FieldLabel}" />
+      <ComboBox FlowDirection="LeftToRight" MinWidth="260" HorizontalAlignment="Left"
+                ItemsSource="{Binding WatermarkColumns}" SelectedItem="{Binding SelectedWatermark}"
+                Visibility="{Binding IsNew, Converter={StaticResource BoolToVis}}" />
+      <TextBlock Text="{Binding SelectedWatermark}" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontWeight="SemiBold"
+                 Visibility="{Binding IsExisting, Converter={StaticResource BoolToVis}}" />
+      <TextBlock Text="{x:Static l:MonitoringStrings.WatermarkHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,18" />
+
+      <!-- Conditions -->
+      <Border Style="{StaticResource Card}" Padding="16" CornerRadius="14" Margin="0,0,0,18">
+        <StackPanel>
+          <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <TextBlock Text="{x:Static l:MonitoringStrings.Conditions}" Style="{StaticResource FieldLabel}" Margin="0,0,12,0" VerticalAlignment="Center" />
+            <Border Grid.Column="1" HorizontalAlignment="Left" Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="3">
+              <StackPanel Orientation="Horizontal">
+                <RadioButton Style="{StaticResource SegmentButton}" GroupName="monitorLogic" Content="{x:Static l:Strings.MatchAll}" FontSize="12" IsChecked="{Binding MatchAll}" />
+                <RadioButton Style="{StaticResource SegmentButton}" GroupName="monitorLogic" Content="{x:Static l:Strings.MatchAny}" FontSize="12" IsChecked="{Binding UseOr}" />
+              </StackPanel>
+            </Border>
+            <Button Grid.Column="2" Style="{StaticResource LinkButton}" Content="{x:Static l:MonitoringStrings.AddCondition}" Command="{Binding AddFilterCommand}" />
+          </Grid>
+
+          <ItemsControl ItemsSource="{Binding Filters}" IsTabStop="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170" /><ColumnDefinition Width="150" /><ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <!-- Column picker -->
+                  <ComboBox FlowDirection="LeftToRight" Margin="0,0,8,0"
+                            ItemsSource="{Binding DataContext.FilterableColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            SelectedItem="{Binding Column}" />
+
+                  <!-- Operator picker -->
+                  <ComboBox Grid.Column="1" Margin="0,0,8,0"
+                            ItemsSource="{Binding DataContext.Operators, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            SelectedItem="{Binding SelectedOperator}">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+
+                  <!-- Value 1 -->
+                  <Grid Grid.Column="2" Visibility="{Binding NeedsValue, Converter={StaticResource BoolToVis}}">
+                    <ContentControl Content="{Binding}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                      <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                          <Setter Property="ContentTemplate" Value="{StaticResource TextMonitorValueTemplate}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDateTimeField}" Value="True">
+                              <Setter Property="ContentTemplate" Value="{StaticResource DateTimeMonitorValueTemplate}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ContentControl.Style>
+                    </ContentControl>
+                  </Grid>
+
+                  <!-- Value 2 (Between) -->
+                  <Grid Grid.Column="3" Margin="8,0,0,0"
+                        Visibility="{Binding NeedsSecondValue, Converter={StaticResource BoolToVis}}">
+                    <ContentControl Content="{Binding}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                      <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                          <Setter Property="ContentTemplate" Value="{StaticResource TextMonitorValue2Template}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDateTimeField}" Value="True">
+                              <Setter Property="ContentTemplate" Value="{StaticResource DateTimeMonitorValue2Template}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ContentControl.Style>
+                    </ContentControl>
+                  </Grid>
+
+                  <Button Grid.Column="4" Style="{StaticResource IconButton}" Content="&#xE711;" Margin="4,0,0,0"
+                          Command="{Binding DataContext.RemoveFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- Live map: matching records with valid coordinates appear on the map as they are found. Off by default. -->
+      <Border Style="{StaticResource Card}" Padding="16" CornerRadius="14" Margin="0,0,0,18">
+        <StackPanel>
+          <CheckBox Content="{x:Static l:MonitoringStrings.LiveMapTitle}" IsChecked="{Binding UseLiveMap}" />
+          <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          <StackPanel Margin="0,12,0,0" Visibility="{Binding UseLiveMap, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapIconTitle}" Style="{StaticResource FieldLabel}" />
+            <!-- Icon: the chosen marker on a button; folders and icons open in a popup, like the Excel layer picker -->
+            <Button x:Name="LiveIconTrigger" Command="{Binding ToggleLiveMapIconPickerCommand}" HorizontalContentAlignment="Stretch" Padding="8,6" Margin="0,4,0,4"
+                    AutomationProperties.Name="{x:Static l:MonitoringStrings.LiveMapIconTitle}" ToolTip="{x:Static l:MapUiStrings.MarkerPickerHint}">
+              <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <Viewbox Width="22" Height="22" Visibility="{Binding HasLiveMapIcon, Converter={StaticResource BoolToVis}}">
+                  <Canvas Width="24" Height="24"><Path Data="{Binding LiveMapIconShape}" Fill="{Binding LiveMapColorBrush}" /></Canvas>
+                </Viewbox>
+                <TextBlock Grid.Column="1" Text="{Binding LiveMapIconName}" Margin="10,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <Path Grid.Column="2" Data="M4 6 L8 10 L12 6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+            <Popup PlacementTarget="{Binding ElementName=LiveIconTrigger}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True"
+                   IsOpen="{Binding IsLiveMapIconPickerOpen, Mode=TwoWay}">
+              <Border Width="330" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                      CornerRadius="12" Padding="10" Margin="0,4,0,0">
+                <StackPanel>
+                  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,8">
+                    <ItemsControl ItemsSource="{Binding LiveMapIconCategories}" IsTabStop="False">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Content="{Binding Name}" CommandParameter="{Binding}" Command="{Binding DataContext.SelectLiveMapIconCategoryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                  AutomationProperties.Name="{Binding Name}" Margin="0,0,6,0">
+                            <Button.Style>
+                              <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Padding" Value="10,4" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Button.Style>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
+                  <ScrollViewer MaxHeight="280" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding SelectedLiveMapIconCategory.Icons}" IsTabStop="False">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Width="300" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Command="{Binding SelectCommand}" ToolTip="{Binding Name}" AutomationProperties.Name="{Binding Name}" Width="40" Height="40" Margin="1">
+                            <Button.Style>
+                              <Style TargetType="Button" BasedOn="{StaticResource ChoiceButton}">
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Button.Style>
+                            <Viewbox Width="22" Height="22">
+                              <Canvas Width="24" Height="24">
+                                <Path Data="{Binding Shape}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                              </Canvas>
+                            </Viewbox>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
+                </StackPanel>
+              </Border>
+            </Popup>
+
+            <!-- Colour: swatches, the chosen one has the accent ring -->
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapColorTitle}" Style="{StaticResource FieldLabel}" Margin="0,12,0,6" />
+            <ItemsControl ItemsSource="{Binding LiveMapColorChoices}" IsTabStop="False">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Style="{StaticResource ChoiceButton}" Command="{Binding SelectCommand}" ToolTip="{Binding Hex}" AutomationProperties.Name="{Binding Hex}">
+                    <Ellipse Width="18" Height="18" Fill="{Binding Brush}" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapDurationTitle}" Style="{StaticResource FieldLabel}" Margin="0,12,0,0" />
+            <ComboBox ItemsSource="{Binding LiveMapDurations}" SelectedValuePath="Minutes" SelectedValue="{Binding LiveMapMinutes}">
+              <!-- Explicit template: the app's global ComboBox style ignores DisplayMemberPath in the selection box. -->
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Label}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapDurationHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
+            <CheckBox Margin="0,12,0,0" Content="{x:Static l:MonitoringStrings.LiveMapShowAllTitle}" IsChecked="{Binding LiveMapShowAll}"
+                      Visibility="{Binding ShowLiveMapShowAll, Converter={StaticResource BoolToVis}}" />
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapShowAllHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Visibility="{Binding ShowLiveMapShowAll, Converter={StaticResource BoolToVis}}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Coordinate columns: needed by the live map and by the proximity rule. -->
+      <Border Style="{StaticResource Card}" Padding="16" CornerRadius="14" Margin="0,0,0,18"
+              Visibility="{Binding ShowCoordinatePickers, Converter={StaticResource BoolToVis}}">
+        <StackPanel>
+          <TextBlock Text="{x:Static l:MonitoringStrings.CoordinateColumnsTitle}" FontWeight="SemiBold" Margin="0,0,0,12" />
+          <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,8,0">
+              <TextBlock Text="ستون عرض جغرافیایی (Latitude)" Style="{StaticResource FieldLabel}" />
+              <ComboBox FlowDirection="LeftToRight" ItemsSource="{Binding CoordinateColumns}" SelectedItem="{Binding SelectedLatitudeColumn}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+              <TextBlock Text="ستون طول جغرافیایی (Longitude)" Style="{StaticResource FieldLabel}" />
+              <ComboBox FlowDirection="LeftToRight" ItemsSource="{Binding CoordinateColumns}" SelectedItem="{Binding SelectedLongitudeColumn}" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Optional client-side spatial rule; map visibility and drawing radius are intentionally unrelated. -->
+      <Border Style="{StaticResource Card}" Padding="16" CornerRadius="14" Margin="0,0,0,18">
+        <StackPanel>
+          <CheckBox Content="{x:Static l:MonitoringStrings.ProximityTitle}" IsChecked="{Binding UseProximity}" />
+          <StackPanel Margin="0,12,0,0" Visibility="{Binding UseProximity, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{x:Static l:MonitoringStrings.ProximityLayers}" Style="{StaticResource FieldLabel}" />
+            <!-- Several layers may be watched at once: every ticked layer contributes its own points. -->
+            <Border BorderThickness="1" BorderBrush="{DynamicResource LineBrush}" CornerRadius="8" Padding="10,6" Margin="0,0,0,12">
+              <StackPanel>
+                <TextBlock Text="{x:Static l:MonitoringStrings.ProximityNoLayers}" TextWrapping="Wrap">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding CoordinateLayerChoices.Count}" Value="0">
+                          <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding CoordinateLayerChoices}" IsTabStop="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <CheckBox IsChecked="{Binding IsSelected}" Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Text="{Binding Name}" />
+                          <TextBlock Text="{Binding PointsText}" Style="{StaticResource Muted}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                      </CheckBox>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+            <TextBlock Text="{x:Static l:MonitoringStrings.ProximityDistance}" Style="{StaticResource FieldLabel}" />
+            <TextBox Width="160" HorizontalAlignment="Left" FlowDirection="LeftToRight"
+                     Text="{Binding DistanceText, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="{x:Static l:MonitoringStrings.ProximityHint}"
+                       Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Schedule (unchanged) -->
+      <TextBlock Text="{x:Static l:MonitoringStrings.Interval}" Style="{StaticResource FieldLabel}" />
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <TextBox Width="110" FlowDirection="LeftToRight" Text="{Binding IntervalText, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="{x:Static l:MonitoringStrings.IntervalHint}" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0" />
+      </StackPanel>
+
+      <!-- Report folder (unchanged) -->
+      <TextBlock Text="{x:Static l:MonitoringStrings.OutputFolder}" Style="{StaticResource FieldLabel}" />
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <TextBox FlowDirection="LeftToRight" Text="{Binding OutputFolder, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Column="1" Content="{x:Static l:MonitoringStrings.Browse}" Command="{Binding BrowseFolderCommand}" Margin="8,0,0,0" Padding="14,8" />
+      </Grid>
+
+      <CheckBox Content="{x:Static l:MonitoringStrings.PlaySound}" IsChecked="{Binding PlaySound}" Margin="0,0,0,20" />
+
+      <!-- Error -->
+      <Border Background="{DynamicResource DangerSoftBrush}" CornerRadius="10" Padding="12,10" Margin="0,0,0,14">
+        <Border.Style>
+          <Style TargetType="Border"><Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers><DataTrigger Binding="{Binding ErrorMessage}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
+        </Style>
+        </Border.Style>
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" />
+      </Border>
+
+      <StackPanel Orientation="Horizontal">
+        <Button Style="{StaticResource PrimaryButton}" Content="{x:Static l:MonitoringStrings.Save}" Command="{Binding SaveCommand}" MinWidth="120" />
+        <Button Content="{x:Static l:Strings.Cancel}" Command="{Binding CancelCommand}" Margin="10,0,0,0" MinWidth="120" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

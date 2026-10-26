@@ -1,0 +1,14 @@
+<UserControl x:Class="FastDbExplorer.Wpf.Views.MapIcon" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False" Focusable="False">
+  <!-- Folded map with a location pin. Uses the Foreground colour, so it works in light + dark and on any background. -->
+  <Viewbox Stretch="Uniform">
+    <Canvas Width="24" Height="24">
+      <Path Data="M3,6.5 L9,4 L15,6.5 L21,4 L21,17.5 L15,20 L9,17.5 L3,20 Z" StrokeThickness="1.6" StrokeLineJoin="Round"
+            Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+      <Path Data="M9,4 L9,17.5 M15,6.5 L15,20" StrokeThickness="1.3" Opacity="0.65"
+            Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+      <Path Data="M12,14 L9.8,10.4 A2.6,2.6 0 1 1 14.2,10.4 Z"
+            Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+    </Canvas>
+  </Viewbox>
+</UserControl>

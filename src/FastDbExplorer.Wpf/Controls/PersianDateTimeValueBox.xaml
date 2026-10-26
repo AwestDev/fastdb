@@ -1,0 +1,23 @@
+<UserControl x:Class="FastDbExplorer.Wpf.Controls.PersianDateTimeValueBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:FastDbExplorer.Wpf.Localization"
+             Loaded="ValueBox_Loaded" Unloaded="ValueBox_Unloaded">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="34" />
+    </Grid.ColumnDefinitions>
+    <TextBox x:Name="DisplayBox" Grid.Column="0" IsReadOnly="True" Cursor="Hand"
+             FlowDirection="LeftToRight" TextAlignment="Left" FontFamily="Consolas" FontSize="12"
+             Padding="9,0" VerticalContentAlignment="Center"
+             PreviewMouseLeftButtonUp="DisplayBox_Click" PreviewKeyDown="DisplayBox_KeyDown" />
+    <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE787;"
+            ToolTip="{x:Static l:Strings.PersianDateTimePickerTooltip}" Click="CalendarButton_Click" />
+    <Popup x:Name="PickerPopup" PlacementTarget="{Binding ElementName=DisplayBox}" Placement="Bottom"
+           VerticalOffset="4" AllowsTransparency="True" PopupAnimation="Fade" StaysOpen="False">
+      <Border x:Name="PickerBorder" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+              BorderThickness="1" CornerRadius="14" />
+    </Popup>
+  </Grid>
+</UserControl>

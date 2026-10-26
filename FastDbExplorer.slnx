@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FastDbExplorer.Domain/FastDbExplorer.Domain.csproj" />
+    <Project Path="src/FastDbExplorer.Application/FastDbExplorer.Application.csproj" />
+    <Project Path="src/FastDbExplorer.Infrastructure/FastDbExplorer.Infrastructure.csproj" />
+    <Project Path="src/FastDbExplorer.Wpf/FastDbExplorer.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FastDbExplorer.Tests/FastDbExplorer.Tests.csproj" />
+  </Folder>
+</Solution>

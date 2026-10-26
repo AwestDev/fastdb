@@ -1,0 +1,148 @@
+<Window x:Class='FastDbExplorer.Wpf.Views.SplashWindow' xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+        xmlns:l='clr-namespace:FastDbExplorer.Wpf.Localization'
+        Title='{x:Static l:WindowStrings.AppName}' Icon='pack://application:,,,/Assets/app.ico'
+        Width='1100' Height='700' WindowStyle='None' AllowsTransparency='True' Background='Transparent'
+        ResizeMode='NoResize' ShowInTaskbar='False' WindowStartupLocation='CenterScreen'
+        UseLayoutRounding='True' FontFamily='{StaticResource AppFont}'>
+  <!-- Dark ocean/space background inspired by Orion Intelligence Platform -->
+  <Grid Width='1100' Height='700' FlowDirection='LeftToRight'>
+    <Grid.Clip><RectangleGeometry Rect='0,0,1100,700' RadiusX='16' RadiusY='16' /></Grid.Clip>
+    <Canvas Width='1100' Height='700'>
+
+      <!-- Deep ocean/space background -->
+      <Rectangle Width='1100' Height='700' Fill='#0C1B2E' />
+
+      <!-- Radial glow from center-right (like earth light) -->
+      <Rectangle Width='1100' Height='700'>
+        <Rectangle.Fill>
+          <RadialGradientBrush Center='0.65,0.45' GradientOrigin='0.65,0.45' RadiusX='0.55' RadiusY='0.55'>
+            <GradientStop Color='#1A3F6B' Offset='0' />
+            <GradientStop Color='#0A1F3B' Offset='0.4' />
+            <GradientStop Color='#0C1B2E' Offset='1' />
+          </RadialGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+
+      <!-- Stylized Earth (right side, partially visible) -->
+      <Ellipse Canvas.Left='700' Canvas.Top='80' Width='500' Height='500' Fill='#1E4A6F' Opacity='0.3' />
+
+      <!-- Earth light effect: golden/yellow glow for night lights -->
+      <Ellipse Canvas.Left='750' Canvas.Top='150' Width='300' Height='300'>
+        <Ellipse.Fill>
+          <RadialGradientBrush Center='0.5,0.5' GradientOrigin='0.5,0.5' RadiusX='0.5' RadiusY='0.5'>
+            <GradientStop Color='#FFD700' Offset='0' />
+            <GradientStop Color='#CC8800' Offset='0.3' />
+            <GradientStop Color='#662200' Offset='1' />
+          </RadialGradientBrush>
+        </Ellipse.Fill>
+        <Ellipse.Effect><BlurEffect Radius='60' /></Ellipse.Effect>
+      </Ellipse>
+
+      <!-- Earth blue highlight (top-right) -->
+      <Ellipse Canvas.Left='850' Canvas.Top='50' Width='200' Height='200'>
+        <Ellipse.Fill>
+          <RadialGradientBrush Center='0.5,0.5' GradientOrigin='0.5,0.5' RadiusX='0.5' RadiusY='0.5'>
+            <GradientStop Color='#4DA6FF' Offset='0' />
+            <GradientStop Color='#1E6699' Offset='1' />
+          </RadialGradientBrush>
+        </Ellipse.Fill>
+        <Ellipse.Effect><BlurEffect Radius='40' /></Ellipse.Effect>
+      </Ellipse>
+
+      <!-- Floating tech particles (small dots) -->
+      <Ellipse Canvas.Left='200' Canvas.Top='150' Width='3' Height='3' Fill='#4DA6FF' Opacity='0.8' />
+      <Ellipse Canvas.Left='300' Canvas.Top='250' Width='2' Height='2' Fill='#4DA6FF' Opacity='0.6' />
+      <Ellipse Canvas.Left='250' Canvas.Top='400' Width='4' Height='4' Fill='#7AC943' Opacity='0.5' />
+      <Ellipse Canvas.Left='900' Canvas.Top='200' Width='2.5' Height='2.5' Fill='#4DA6FF' Opacity='0.7' />
+      <Ellipse Canvas.Left='950' Canvas.Top='350' Width='3' Height='3' Fill='#FFD700' Opacity='0.6' />
+
+      <!-- Left column: Logo and branding -->
+      <StackPanel Canvas.Left='40' Canvas.Top='60' Width='280'>
+        <!-- Logo: compass/star in a circle -->
+        <Viewbox Width='64' Height='64' Margin='0,0,0,16'>
+          <Canvas Width='64' Height='64'>
+            <!-- Outer circle -->
+            <Ellipse Width='64' Height='64' Stroke='#4DA6FF' StrokeThickness='2' />
+            <!-- Inner star/compass: four cardinal points -->
+            <Path Stroke='#4DA6FF' StrokeThickness='2.5' StrokeStartLineCap='Round' StrokeEndLineCap='Round'>
+              <Path.Data>
+                <GeometryGroup>
+                  <LineGeometry StartPoint='32,8' EndPoint='32,24' />
+                  <LineGeometry StartPoint='56,32' EndPoint='40,32' />
+                  <LineGeometry StartPoint='32,56' EndPoint='32,40' />
+                  <LineGeometry StartPoint='8,32' EndPoint='24,32' />
+                </GeometryGroup>
+              </Path.Data>
+            </Path>
+            <!-- Center dot -->
+            <Ellipse Canvas.Left='29' Canvas.Top='29' Width='6' Height='6' Fill='#4DA6FF' />
+          </Canvas>
+        </Viewbox>
+
+        <!-- App title -->
+        <TextBlock FontSize='28' FontWeight='Bold' Foreground='White' Margin='0,0,0,2'>
+          <Run Text='Fast' /><Run Text='Db' Foreground='#4DA6FF' /><Run Text='Explorer' />
+        </TextBlock>
+        <!-- Subtitle -->
+        <TextBlock FontSize='13' Foreground='#7AC943' Margin='0,0,0,24' Text='Geospatial Intelligence for Data' />
+
+        <!-- Tagline -->
+        <TextBlock FontSize='11.5' Foreground='#9FB2D9' TextWrapping='Wrap' Margin='0,0,0,32'>
+          Explore massive databases with GIS intelligence, real-time analytics, and precise spatial queries.
+        </TextBlock>
+
+        <!-- Progress steps (dynamic) -->
+        <StackPanel x:Name='StepsPanel' Width='260'>
+          <!-- Each step is populated dynamically in code-behind -->
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Right column: Progress bar and status -->
+      <StackPanel Canvas.Right='40' Canvas.Bottom='80' Width='300'>
+
+        <!-- Large percentage -->
+        <TextBlock x:Name='PercentageText' FontSize='48' FontWeight='Bold' Foreground='#4DA6FF' TextAlignment='Center' Margin='0,0,0,16' Text='0%' />
+
+        <!-- Status text -->
+        <TextBlock x:Name='StatusText' FontSize='13' Foreground='#9FB2D9' TextAlignment='Center' Margin='0,0,0,20' TextWrapping='Wrap' MinHeight='32' />
+
+        <!-- Progress bar (animated) -->
+        <Grid Height='3' Margin='0,0,0,12'>
+          <Border CornerRadius='2' Background='#1AFFFFFF' />
+          <Border x:Name='ProgressFill' HorizontalAlignment='Left' Width='0' Height='3' CornerRadius='2' Background='#4DA6FF' />
+        </Grid>
+
+        <!-- Shimmer effect on progress bar -->
+        <Grid Height='3' Margin='0,-3,0,12'>
+          <Border x:Name='ProgressShimmer' HorizontalAlignment='Left' Width='40' Height='3' Background='#8CFFFFFF' Opacity='0.4'>
+            <Border.RenderTransform><TranslateTransform X='0' /></Border.RenderTransform>
+            <Border.Triggers>
+              <EventTrigger RoutedEvent='FrameworkElement.Loaded'>
+                <BeginStoryboard>
+                  <Storyboard RepeatBehavior='Forever'>
+                    <DoubleAnimation Storyboard.TargetName='ProgressShimmer' Storyboard.TargetProperty='(UIElement.RenderTransform).(TranslateTransform.X)' From='-40' To='300' Duration='0:0:1.2' />
+                  </Storyboard>
+                </BeginStoryboard>
+              </EventTrigger>
+            </Border.Triggers>
+          </Border>
+        </Grid>
+
+        <!-- Sub-status (file being loaded, etc.) -->
+        <TextBlock x:Name='SubStatusText' FontSize='11' Foreground='#5F7A9E' TextAlignment='Center' TextWrapping='Wrap' MinHeight='24' />
+      </StackPanel>
+
+      <!-- Footer: version + copyright -->
+      <Grid Canvas.Left='40' Canvas.Bottom='20' Width='1020'>
+        <Grid.ColumnDefinitions><ColumnDefinition Width='*' /><ColumnDefinition Width='Auto' /></Grid.ColumnDefinitions>
+        <TextBlock FontSize='11' Foreground='#5F7A9E'>
+          <Run Text='FastDbExplorer' /><Run Text=' — ' /><Run Text='Spatial Data Explorer' />
+        </TextBlock>
+        <TextBlock x:Name='VersionText' Grid.Column='1' FontSize='11' Foreground='#5F7A9E' />
+      </Grid>
+
+      <!-- Thin bright border -->
+      <Rectangle Width='1100' Height='700' StrokeThickness='1' Stroke='#1A4DA6FF' Fill='Transparent' />
+    </Canvas>
+  </Grid>
+</Window>

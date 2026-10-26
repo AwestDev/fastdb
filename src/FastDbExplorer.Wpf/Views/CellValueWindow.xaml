@@ -1,0 +1,50 @@
+<Window x:Class="FastDbExplorer.Wpf.Views.CellValueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="مشاهده مقدار کامل" Width="780" Height="560" MinWidth="420" MinHeight="320"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
+        FlowDirection="RightToLeft" Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextBrush}"
+        Loaded="Window_Loaded">
+  <Grid Margin="22">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Margin="0,0,0,14">
+      <TextBlock Text="ستون" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+      <TextBlock x:Name="ColumnNameText" FlowDirection="LeftToRight" TextWrapping="Wrap"
+                 FontSize="18" FontWeight="SemiBold" Margin="0,3,0,0" />
+    </StackPanel>
+
+    <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+            BorderThickness="1" CornerRadius="12" Padding="12">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border x:Name="NullIndicator" Visibility="Collapsed" Background="{DynamicResource SurfaceAltBrush}"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="8"
+                Padding="10,6" Margin="0,0,0,8">
+          <TextBlock Text="NULL · مقدار خالی پایگاه‌داده" Foreground="{DynamicResource MutedBrush}"
+                     AutomationProperties.Name="مقدار تهی پایگاه‌داده" />
+        </Border>
+        <TextBox x:Name="ValueTextBox" Grid.Row="1" FlowDirection="LeftToRight" TextAlignment="Left"
+                 TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                 VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 Padding="12" Background="{DynamicResource SurfaceAltBrush}" Foreground="{DynamicResource TextBrush}"
+                 BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" FontFamily="Consolas"
+                 AutomationProperties.Name="مقدار کامل سلول" />
+      </Grid>
+    </Border>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,16,0,0">
+      <Button Content="کپی مقدار کامل" Style="{StaticResource PrimaryButton}" Click="Copy_Click"
+              AutomationProperties.Name="کپی مقدار کامل" ToolTip="کپی متن کامل در کلیپ‌بورد" />
+      <Button Content="بستن" IsCancel="True" Margin="8,0,0,0" MinWidth="90"
+              AutomationProperties.Name="بستن پنجره مقدار" />
+    </StackPanel>
+  </Grid>
+</Window>

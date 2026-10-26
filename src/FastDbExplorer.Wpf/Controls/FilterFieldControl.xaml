@@ -1,0 +1,59 @@
+<UserControl x:Class='FastDbExplorer.Wpf.Controls.FilterFieldControl'
+             xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+             xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+             xmlns:local='clr-namespace:FastDbExplorer.Wpf.Controls'
+             Width='280' Height='Auto' Foreground='{DynamicResource TextBrush}'>
+  <StackPanel>
+    <!-- Label + Field Type Indicator -->
+    <Grid Margin='0,0,0,6'>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width='*' />
+        <ColumnDefinition Width='Auto' />
+      </Grid.ColumnDefinitions>
+      <TextBlock x:Name='FieldLabel' FontSize='11' FontWeight='SemiBold' Foreground='{DynamicResource TextBrush}' />
+      <Border Grid.Column='1' Background='{DynamicResource SurfaceBrush}' CornerRadius='2' Padding='6,2'>
+        <TextBlock x:Name='FieldTypeTag' FontSize='9' Foreground='{DynamicResource MutedBrush}' />
+      </Border>
+    </Grid>
+
+    <!-- Input Area: Conditional on Field Type (wrapped in Border for CornerRadius) -->
+    <Border Height='32' Background='{DynamicResource SurfaceBrush}' CornerRadius='3'>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width='*' />
+          <ColumnDefinition Width='32' />
+        </Grid.ColumnDefinitions>
+
+        <!-- Text/Number Input (for non-datetime fields) -->
+        <TextBox x:Name='InputTextBox'
+                 Grid.Column='0'
+                 Padding='10,0'
+                 Background='{DynamicResource SurfaceBrush}'
+                 Foreground='{DynamicResource TextBrush}'
+                 BorderThickness='0'
+                 VerticalContentAlignment='Center'
+                 FontSize='12'
+                 Visibility='Collapsed' />
+
+        <local:PersianDateTimeValueBox x:Name='DateTimeInput' Grid.Column='0' Visibility='Collapsed' />
+
+        <!-- Action Button (different icon per field type) -->
+        <Button x:Name='ActionButton'
+                Grid.Column='1'
+                Background='Transparent'
+                Foreground='{DynamicResource AccentBrush}'
+                FontSize='14'
+                Cursor='Hand'
+                Click='ActionButton_Click' />
+      </Grid>
+    </Border>
+
+    <!-- Hint Text -->
+    <TextBlock x:Name='HintText'
+               FontSize='10'
+               Foreground='{DynamicResource MutedBrush}'
+               Margin='0,6,0,0'
+               TextWrapping='Wrap'
+               Visibility='Collapsed' />
+  </StackPanel>
+</UserControl>

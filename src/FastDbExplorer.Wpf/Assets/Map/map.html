@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="maplibre-gl.css">
+<style>
+  html, body, #map { margin: 0; height: 100%; overflow: hidden; }
+  body { background: #0E1220; font-family: "Segoe UI", Tahoma, sans-serif; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="maplibre-gl.js"></script>
+<script src="coordinate-layers.js"></script>
+<script src="map-tools.js"></script>
+<script>
+// Talks to the WPF host through window.chrome.webview. Tiles come from https://tiles.local/{z}/{x}/{y}
+// (intercepted by the host and served from the opened map file, so no server and no internet are needed).
+const host = window.chrome && window.chrome.webview;
+const post = (m) => host && host.postMessage(m);
+let map = null, info = null, pendingMove = false;
+
+// Every map opens on Iran (centre [lng, lat], zoom 4.7), whatever the file covers. "Fit to map" still zooms to the file's bounds.
+const IRAN_VIEW = { center: [53.688, 32.428], zoom: 4.7 };
+
+const hue = (name) => { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; };
+const colorOf = (name, dark) => `hsl(${hue(name)}, 62%, ${dark ? 62 : 42}%)`;
+
+// Generic style: every vector layer gets a fill (polygons), a line (lines + polygon outlines) and a circle (points),
+// so ANY vector file is drawn without knowing its schema. Layer ids: "<layer>|fill|line|circle".
+function buildStyle(i, dark) {
+  const tiles = ['https://tiles.local/{z}/{x}/{y}'];
+  // No "bounds" on the source: it would stop MapLibre from asking for tiles outside it (e.g. wide low-zoom tiles).
+  const common = { tiles, minzoom: i.minZoom, maxzoom: i.maxZoom };
+  const layers = [{ id: 'bg', type: 'background', paint: { 'background-color': dark ? '#0E1220' : '#EDEFF5' } }];
+  const sources = {};
+
+  if (i.kind === 'raster') {
+    sources.map = { type: 'raster', tileSize: 256, ...common };
+    layers.push({ id: 'raster', type: 'raster', source: 'map' });
+  } else {
+    sources.map = { type: 'vector', ...common };
+    for (const name of i.layers) {
+      const c = colorOf(name, dark);
+      const base = { source: 'map', 'source-layer': name };
+      layers.push({ ...base, id: name + '|fill', type: 'fill',
+        filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': c, 'fill-opacity': 0.4 } });
+      layers.push({ ...base, id: name + '|line', type: 'line',
+        filter: ['any', ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'Polygon']],
+        paint: { 'line-color': c, 'line-width': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 14, 1.4, 18, 3] } });
+      layers.push({ ...base, id: name + '|circle', type: 'circle',
+        filter: ['==', ['geometry-type'], 'Point'],
+        paint: { 'circle-color': c, 'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 1.5, 14, 3, 18, 6] } });
+    }
+  }
+  if (i.kind !== 'raster') addLabels(layers, i.layers, dark);
+  // Fonts are plain files in Assets/Map/fonts/<n>/<range>.pbf (downloaded by setup-map-assets.cmd), no internet at run time.
+  return { version: 8, glyphs: 'https://app.local/fonts/{fontstack}/{range}.pbf', sources, layers };
+}
+
+// Text labels for OpenMapTiles-style vector files (place, roads, water, poi ...). Layers that a file lacks are skipped.
+// Name priority: Persian name -> English name -> Latin transliteration -> local name.
+const FONT = ['NotoSans'];
+const NAME = ['coalesce', ['get', 'name:fa'], ['get', 'name_en'], ['get', 'name:latin'], ['get', 'name']];
+const zoomSize = (...stops) => ['interpolate', ['linear'], ['zoom'], ...stops];
+const inList = (prop, list) => ['in', ['get', prop], ['literal', list]];
+
+function addLabels(layers, names, dark) {
+  const has = (n) => names.includes(n);
+  const ink = dark ? '#E8ECF8' : '#1B2033';
+  const halo = dark ? '#0E1220' : '#FFFFFF';
+  const water = dark ? '#7FB2FF' : '#2B6CB0';
+  const add = (id, source, minzoom, maxzoom, filter, layout, color) => {
+    if (!has(source)) return;
+    const layer = {
+      id: source + '|label|' + id, type: 'symbol', source: 'map', 'source-layer': source, minzoom,
+      layout: { 'text-field': NAME, 'text-font': FONT, 'text-max-width': 8, 'text-padding': 2, ...layout },
+      paint: { 'text-color': color || ink, 'text-halo-color': halo, 'text-halo-width': 1.5 }
+    };
+    if (maxzoom) layer.maxzoom = maxzoom;
+    if (filter) layer.filter = filter;
+    layers.push(layer);
+  };
+  const rank = { 'symbol-sort-key': ['coalesce', ['get', 'rank'], 100] };
+
+  add('country', 'place', 1, 8, ['==', ['get', 'class'], 'country'], { ...rank, 'text-size': zoomSize(1, 11, 6, 17) });
+  add('state', 'place', 4, 9, inList('class', ['state', 'province']), { ...rank, 'text-size': zoomSize(4, 11, 8, 14) });
+  add('city', 'place', 4, null, ['==', ['get', 'class'], 'city'], { ...rank, 'text-size': zoomSize(4, 11, 10, 16, 14, 20) });
+  add('town', 'place', 7, null, ['==', ['get', 'class'], 'town'], { ...rank, 'text-size': zoomSize(7, 10, 12, 15) });
+  add('village', 'place', 10, null, ['==', ['get', 'class'], 'village'], { ...rank, 'text-size': zoomSize(10, 10, 14, 14) });
+  add('small', 'place', 12, null,
+    inList('class', ['hamlet', 'suburb', 'neighbourhood', 'quarter', 'borough', 'island', 'isolated_dwelling']),
+    { ...rank, 'text-size': zoomSize(12, 10, 16, 13) });
+
+  const onLine = { 'symbol-placement': 'line', 'text-letter-spacing': 0.05 };
+  add('major', 'transportation_name', 8, null, inList('class', ['motorway', 'trunk', 'primary']),
+    { ...onLine, 'text-size': zoomSize(8, 10, 16, 13) });
+  add('minor', 'transportation_name', 13, null, ['!', inList('class', ['motorway', 'trunk', 'primary'])],
+    { ...onLine, 'text-size': zoomSize(13, 10, 17, 13) });
+  add('river', 'waterway', 11, null, null, { ...onLine, 'text-size': 11 }, water);
+  add('water', 'water_name', 2, null, null, { 'text-size': zoomSize(2, 11, 10, 14) }, water);
+  add('airport', 'aerodrome_label', 8, null, null, { 'text-size': 11 });
+  add('peak', 'mountain_peak', 7, null, null, { 'text-size': 10, 'text-anchor': 'top', 'text-offset': [0, 0.5] });
+  add('poi', 'poi', 15, null, null, { 'text-size': 10, 'text-anchor': 'top', 'text-offset': [0, 0.6] });
+  add('number', 'housenumber', 17, null, null, { 'text-field': ['get', 'housenumber'], 'text-size': 9 });
+}
+
+function fit(animate) {
+  if (!map || !info || !info.bounds) return;
+  const b = info.bounds;
+  map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 40, duration: animate ? 600 : 0 });
+}
+
+// view = the camera the user had when the map section was left ({ lng, lat, zoom }), or null for a newly opened file.
+function load(i, dark, view) {
+  info = i;
+  if (map) { map.remove(); map = null; }
+  // A newly opened file starts on Iran (see IRAN_VIEW); coming back to the map section restores the last camera.
+  // The file's own centre/bounds are only used by "Fit to map".
+  const restored = view && Number.isFinite(view.lng) && Number.isFinite(view.lat) && Number.isFinite(view.zoom);
+  const start = restored ? { center: [view.lng, view.lat], zoom: view.zoom } : IRAN_VIEW;
+  map = new maplibregl.Map({ container: 'map', style: buildStyle(i, dark), center: start.center, zoom: start.zoom,
+    attributionControl: false, renderWorldCopies: false, maxZoom: 22 });
+  // Zoom in/out + compass sit at the top RIGHT of the map (the window buttons are top right too; the app icon/name are top left).
+  map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+  map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+  map.on('mousemove', (e) => {
+    if (pendingMove) return;
+    pendingMove = true;
+    requestAnimationFrame(() => { pendingMove = false; post({ type: 'cursor', lng: e.lngLat.lng, lat: e.lngLat.lat }); });
+  });
+  map.on('zoom', () => post({ type: 'zoom', zoom: map.getZoom() }));
+  // The host keeps the last camera so the map looks the same after the user visits another section and comes back.
+  map.on('moveend', () => { const c = map.getCenter(); post({ type: 'view', lng: c.lng, lat: c.lat, zoom: map.getZoom() }); });
+  map.on('load', () => { post({ type: 'zoom', zoom: map.getZoom() }); });
+  // Excel coordinate layers (coordinate-layers.js) are redrawn on every new map.
+  if (typeof coordAttach === 'function') coordAttach(map, dark);
+  // Map tools (map-tools.js): go to coordinates, pick coordinates, measure distance. Attached after the coordinate layers, so they draw on top.
+  if (typeof toolsAttach === 'function') toolsAttach(map, dark);
+}
+
+function setLayerVisible(name, visible) {
+  if (!map) return;
+  for (const l of map.getStyle().layers)
+    if (l['source-layer'] === name) map.setLayoutProperty(l.id, 'visibility', visible ? 'visible' : 'none');
+}
+
+// Persian/Arabic letters must be joined and right-to-left: MapLibre needs this plugin (a local file, optional).
+if (typeof maplibregl !== 'undefined') {
+  try {
+    const p = maplibregl.setRTLTextPlugin('https://app.local/mapbox-gl-rtl-text.min.js', true);
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) { /* plugin missing: labels still show, Persian letters just stay unjoined */ }
+}
+
+if (typeof maplibregl === 'undefined') {
+  document.body.innerHTML = '<p style="color:#fff;padding:24px">maplibre-gl.js not found. Run setup-map-assets.cmd once.</p>';
+} else if (host) {
+  host.addEventListener('message', (e) => {
+    const m = e.data;
+    if (m.type === 'load') load(m.info, m.dark, m.view);
+    else if (m.type === 'layer') setLayerVisible(m.name, m.visible);
+    else if (m.type === 'fit') fit(true);
+    else if (typeof m.type === 'string' && m.type.startsWith('coord') && typeof coordHandle === 'function') coordHandle(m);
+    else if (typeof m.type === 'string' && m.type.startsWith('tool') && typeof toolsHandle === 'function') toolsHandle(m);
+  });
+  post({ type: 'ready' });
+}
+</script>
+</body>
+</html>

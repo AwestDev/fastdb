@@ -1,0 +1,18 @@
+# Known issues / risks
+- Never compiled or run yet (see PROGRESS.md). Expect small XAML/C# fixes on first build.
+- NuGet versions are floating (`8.*`, `6.*`, ...): pin exact versions after the first successful restore.
+- Icons use Segoe Fluent Icons / MDL2 glyph codes — verify each glyph renders on Windows 10.
+- Animations ignore the Windows "reduce motion" setting.
+- Very large table lists (tens of thousands) load item by item; virtualization is on but not benchmarked.
+- Saved-connection file is plain JSON (no secrets).
+- `localhost` connects via Shared Memory; `127.0.0.1` needs TCP/IP enabled in SQL Server Configuration Manager (restart the SQL service after enabling). Named instance with IP: `127.0.0.1\SQLEXPRESS`, or with port: `127.0.0.1,1433`.
+- Lesson: every `x:Class` view needs a code-behind calling `InitializeComponent()` (missing one gave a blank Explorer screen).
+- MVP-02 never compiled or run yet. Most likely trouble spots: XAML control templates (ComboBox, DataGrid header), indexer bindings `[0]`.
+- `LIKE '%text%'` (Contains/EndsWith) cannot use indexes: on huge tables it can hit the 30 s timeout. Prefer "Starts with" / "=" / ranges.
+- Deep OFFSET paging (only for tables without a usable primary key) gets slower with depth.
+- Huge text/binary cells are read fully before being truncated for display (cell text is cut at 300 chars).
+- Filter values use invariant culture: dates like 2025-01-31, decimals with a dot.
+- A page-size change applies on the next "Run" (current paging keeps its snapshot).
+- Map slice 1 never compiled/run. GMDB unknown. OSM PBF not rendered (converter planned). No map labels. WebView2 runtime required.
+- Monitoring (see MONITORING.md): never compiled/run. `SELECT MAX(col)` on an un-indexed column of a huge table scans it (30 s timeout) — choose an indexed watermark column. Number (identity) watermarks can miss rows committed out of order; date columns are protected by a 30 s settle time. Monitors only run while the app is open and connected. Alert history is memory only. Updated rows are detected only if the watermark column changes on update.
+- Monitoring glyphs `E823` (sidebar) and `E7BA` (toast) must be checked on Windows 10.

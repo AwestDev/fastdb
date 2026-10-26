@@ -1,0 +1,132 @@
+<UserControl x:Class="FastDbExplorer.Wpf.Controls.PersianDateTimePickerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:FastDbExplorer.Wpf.Localization"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             FlowDirection="RightToLeft" Width="336">
+  <UserControl.Resources>
+    <Style x:Key="CalendarDayButton" TargetType="Button">
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Margin" Value="2" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="DayBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="DayBorder" Property="Opacity" Value="0.78" />
+              </Trigger>
+              <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="DayBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter TargetName="DayBorder" Property="BorderThickness" Value="1" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="TimeBox" TargetType="TextBox">
+      <Setter Property="Width" Value="68" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="MaxLength" Value="2" />
+      <Setter Property="FlowDirection" Value="LeftToRight" />
+      <Setter Property="TextAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="FontFamily" Value="Consolas" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+  </UserControl.Resources>
+
+  <Border Background="{DynamicResource SurfaceBrush}"
+          BorderBrush="{DynamicResource LineBrush}"
+          BorderThickness="1" CornerRadius="14" Padding="14">
+    <StackPanel>
+      <Grid Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="36" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="100" />
+          <ColumnDefinition Width="36" />
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="0" Content="&#xE76B;" FontFamily="Segoe MDL2 Assets"
+                Style="{StaticResource IconButton}" ToolTip="{x:Static l:Strings.PersianDateTimePickerPreviousMonth}" Click="PreviousMonth_Click" />
+        <ComboBox x:Name="MonthComboBox" Grid.Column="1" Margin="3,0" VerticalContentAlignment="Center"
+                  ToolTip="{x:Static l:Strings.PersianDateTimePickerMonth}" SelectionChanged="MonthComboBox_SelectionChanged" />
+        <ComboBox x:Name="YearComboBox" Grid.Column="2" Margin="3,0" FlowDirection="LeftToRight"
+                  VerticalContentAlignment="Center" ToolTip="{x:Static l:Strings.PersianDateTimePickerYear}"
+                  SelectionChanged="YearComboBox_SelectionChanged">
+          <ComboBox.ItemTemplate>
+            <DataTemplate><TextBlock Text="{Binding Label}" FlowDirection="LeftToRight" /></DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Grid.Column="3" Content="&#xE76C;" FontFamily="Segoe MDL2 Assets"
+                Style="{StaticResource IconButton}" ToolTip="{x:Static l:Strings.PersianDateTimePickerNextMonth}" Click="NextMonth_Click" />
+      </Grid>
+
+      <primitives:UniformGrid x:Name="WeekdayGrid" Columns="7" FlowDirection="RightToLeft" />
+      <primitives:UniformGrid x:Name="DayGrid" Columns="7" FlowDirection="RightToLeft" Margin="0,2,0,8" />
+
+      <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="10" Margin="0,0,0,10">
+        <StackPanel>
+          <TextBlock Text="{x:Static l:Strings.PersianDateTimePickerTime}" HorizontalAlignment="Center" FontSize="11" FontWeight="SemiBold"
+                     Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,8" />
+          <primitives:UniformGrid Columns="2">
+            <StackPanel HorizontalAlignment="Center">
+              <TextBlock Text="{x:Static l:Strings.PersianDateTimePickerHour}" HorizontalAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,4" />
+              <Button Content="▲" FontFamily="Segoe UI Symbol" FontSize="13" Padding="5,4" MinWidth="34"
+                      ToolTip="{x:Static l:Strings.PersianDateTimePickerIncreaseHour}" Style="{StaticResource IconButton}" Click="HourUp_Click" />
+              <TextBox x:Name="HourBox" Style="{StaticResource TimeBox}" Tag="Hour"
+                       PreviewTextInput="Time_PreviewTextInput" TextChanged="Time_TextChanged" />
+              <Button Content="▼" FontFamily="Segoe UI Symbol" FontSize="13" Padding="5,4" MinWidth="34"
+                      ToolTip="{x:Static l:Strings.PersianDateTimePickerDecreaseHour}" Style="{StaticResource IconButton}" Click="HourDown_Click" />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center">
+              <TextBlock Text="{x:Static l:Strings.PersianDateTimePickerMinute}" HorizontalAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,4" />
+              <Button Content="▲" FontFamily="Segoe UI Symbol" FontSize="13" Padding="5,4" MinWidth="34"
+                      ToolTip="{x:Static l:Strings.PersianDateTimePickerIncreaseMinute}" Style="{StaticResource IconButton}" Click="MinuteUp_Click" />
+              <TextBox x:Name="MinuteBox" Style="{StaticResource TimeBox}" Tag="Minute"
+                       PreviewTextInput="Time_PreviewTextInput" TextChanged="Time_TextChanged" />
+              <Button Content="▼" FontFamily="Segoe UI Symbol" FontSize="13" Padding="5,4" MinWidth="34"
+                      ToolTip="{x:Static l:Strings.PersianDateTimePickerDecreaseMinute}" Style="{StaticResource IconButton}" Click="MinuteDown_Click" />
+            </StackPanel>
+          </primitives:UniformGrid>
+          <TextBlock x:Name="TimeError" Text="{x:Static l:Strings.PersianDateTimePickerInvalidTime}"
+                     Foreground="{DynamicResource DangerBrush}" FontSize="10" TextWrapping="Wrap"
+                     HorizontalAlignment="Center" Margin="0,6,0,0" Visibility="Collapsed" />
+        </StackPanel>
+      </Border>
+
+      <TextBlock x:Name="PreviewText" FlowDirection="LeftToRight" TextAlignment="Center"
+                 FontFamily="Consolas" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,10" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="0" Content="{x:Static l:Strings.PersianDateTimePickerToday}" Padding="5,8" FontSize="11" Click="Today_Click" />
+        <Button Grid.Column="2" Content="{x:Static l:Strings.PersianDateTimePickerClear}" Padding="5,8" FontSize="11" Click="Clear_Click" />
+        <Button Grid.Column="4" Content="{x:Static l:Strings.PersianDateTimePickerCancel}" Padding="5,8" FontSize="11" Click="Cancel_Click" />
+        <Button x:Name="ApplyButton" Grid.Column="6" Content="{x:Static l:Strings.PersianDateTimePickerApply}" Click="Apply_Click"
+                Padding="5,8" FontSize="11" Background="{DynamicResource AccentBrush}" Foreground="White" FontWeight="SemiBold" />
+      </Grid>
+    </StackPanel>
+  </Border>
+</UserControl>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>FastDbExplorer</AssemblyName>
+    <RootNamespace>FastDbExplorer.Wpf</RootNamespace>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.*" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.*" />
+    <ProjectReference Include="..\FastDbExplorer.Application\FastDbExplorer.Application.csproj" />
+    <ProjectReference Include="..\FastDbExplorer.Infrastructure\FastDbExplorer.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Resource Include="Assets\app.ico" />
+    <Content Include="Assets\Map\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -8,7 +8,7 @@ namespace FastDbExplorer.Wpf.Views;
 /// <summary>Start-up splash. <see cref="App"/> shows it first and reports the real start-up steps through <see cref="Report"/>.</summary>
 public partial class SplashWindow : Window
 {
-    private const double TrackWidth = 260;
+    private const double TrackWidth = 344;
 
     public SplashWindow()
     {

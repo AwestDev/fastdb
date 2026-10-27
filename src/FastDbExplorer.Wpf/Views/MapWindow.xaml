@@ -1,7 +1,7 @@
 <Window x:Class="FastDbExplorer.Wpf.Views.MapWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="نقشه — FastDbExplorer" Width="1280" Height="820" MinWidth="720" MinHeight="480"
+        Title="نقشه — GeoNexus" Width="1280" Height="820" MinWidth="720" MinHeight="480"
         Background="{DynamicResource BgBrush}" FlowDirection="LeftToRight">
   <!--
     The window itself is left-to-right: a right-to-left window would mirror the system title bar and put the minimize / maximize / close

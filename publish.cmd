@@ -4,14 +4,14 @@ setlocal EnableExtensions
 cd /d "%~dp0" || goto :fail
 
 set "ROOT=%~dp0"
-set "OUT=%ROOT%publish\FastDbExplorer"
-set "ZIP=%ROOT%publish\FastDbExplorer-win-x64.zip"
+set "OUT=%ROOT%publish\GeoNexus"
+set "ZIP=%ROOT%publish\GeoNexus-win-x64.zip"
 set "APP_PROJ=src\FastDbExplorer.Wpf\FastDbExplorer.Wpf.csproj"
 set "TEST_PROJ=tests\FastDbExplorer.Tests\FastDbExplorer.Tests.csproj"
 
 echo.
 echo ============================================================
-echo FastDbExplorer - Windows x64 self-contained publish
+echo GeoNexus - Windows x64 self-contained publish
 echo ============================================================
 echo IMPORTANT: Run this script on an INTERNET-CONNECTED build PC.
 echo The destination PC can be offline; it should run the ZIP output,
@@ -72,7 +72,7 @@ echo.
 echo SUCCESS.
 echo Portable folder: %OUT%
 echo ZIP package:    %ZIP%
-echo Copy the ZIP to the offline PC, extract it, and run FastDbExplorer.exe.
+echo Copy the ZIP to the offline PC, extract it, and run GeoNexus.exe.
 echo The offline PC does not need NuGet or internet to run this published app.
 pause
 exit /b 0

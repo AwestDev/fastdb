@@ -36,11 +36,9 @@
         </LinearGradientBrush>
       </Border.Background>
       <StackPanel VerticalAlignment="Center">
-        <Border Width="68" Height="68" CornerRadius="20" Background="#33FFFFFF" HorizontalAlignment="Left">
-          <TextBlock Text="&#xE80A;" FontFamily="{StaticResource IconFont}" FontSize="32" Foreground="White"
-                     HorizontalAlignment="Center" VerticalAlignment="Center" />
-        </Border>
-        <TextBlock Text="FastDbExplorer" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontSize="30"
+        <Image Source="pack://application:,,,/Assets/logo.png" Width="68" Height="68" HorizontalAlignment="Left"
+               RenderOptions.BitmapScalingMode="HighQuality" />
+        <TextBlock Text="GeoNexus" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontSize="30"
                    FontWeight="Bold" Foreground="White" Margin="0,26,0,6" />
         <TextBlock Text="{x:Static l:Strings.Tagline}" FontSize="15" Foreground="#CCFFFFFF" Margin="0,0,0,34" />
         <DockPanel Margin="0,0,0,14">

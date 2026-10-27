@@ -2,7 +2,7 @@
         xmlns:vm="clr-namespace:FastDbExplorer.Wpf.ViewModels"
         xmlns:views="clr-namespace:FastDbExplorer.Wpf.Views"
         xmlns:l="clr-namespace:FastDbExplorer.Wpf.Localization"
-        Title="FastDbExplorer" Icon="pack://application:,,,/Assets/app.ico" Width="1180" Height="760" MinWidth="960" MinHeight="640"
+        Title="GeoNexus" Icon="pack://application:,,,/Assets/app.ico" Width="1180" Height="760" MinWidth="960" MinHeight="640"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen" FlowDirection="RightToLeft" UseLayoutRounding="True"
         FontFamily="{StaticResource AppFont}" FontSize="14"

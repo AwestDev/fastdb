@@ -52,3 +52,11 @@ Verification: XML tag-stack check and static ShellStrings key checks passed for 
 - Refined map toolbar breathing room and visual hierarchy only; map commands, context-menu handlers, visibility triggers, WebView2 host, and side-panel structure remain unchanged.
 
 Verification: balanced XAML tag checks and presence checks for all `MonitoringStrings` references passed for the edited editor and map view source. This does not replace a WPF compile. Build, automated tests, and manual map/monitor editing tests are still required on Windows.
+
+
+## P9 — disconnected prompts and query workspace polish
+- Reframed the disconnected-section prompt as a restrained card with clearer hierarchy and a single primary action, preserving the existing `GoToConnectCommand` binding.
+- Tuned query header, results-surface corners, and spacing without changing the filter/query/export/map-send commands or the query engine.
+- The table filters, result grid, row selection, paging and cancellation remain on their original ViewModel/code-behind pathways.
+
+Verification: source-only XML tag-stack and binding/resource-name checks are planned for the final branch review. .NET/WPF build, tests and manual UI acceptance remain not run in this environment.

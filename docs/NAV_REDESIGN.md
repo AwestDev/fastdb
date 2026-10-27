@@ -24,3 +24,13 @@ Status: P1-P5 written (UNVERIFIED: not compiled, the AI sandbox has no .NET). Ow
 ## Known limits
 - Ctrl+1..4 do not fire while the map (WebView2 native window) has keyboard focus.
 - Views are recreated when switching sections (as before); ViewModels keep the state. The map reloads its last file as before.
+
+
+## P6 — visual design system and home dashboard (branch `feature/complete-ui-redesign`)
+The first visual-polish slice preserves the existing MVVM command and navigation bindings and changes presentation only:
+- Refined light/dark palette tokens and reduced default card shadow weight.
+- Improved common visual rhythm (title, button minimum height, data-grid row height, card geometry).
+- Rebuilt the connected Home dashboard around connection status, quick routes to Explorer/Map/Monitoring, informational metrics and recent alerts.
+- Increased shell breathing room slightly while retaining the existing five-section navigation, active profile/database selectors, Ctrl+K command palette and persistent map host.
+
+Verification status: not compiled or run by the AI. Static binding review only so far; owner must run `dotnet build FastDbExplorer.slnx`, `dotnet test`, and manually inspect light/dark themes, RTL, home shortcuts, reconnect/disconnect and alert updates on Windows.

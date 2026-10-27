@@ -34,3 +34,12 @@ The first visual-polish slice preserves the existing MVVM command and navigation
 - Increased shell breathing room slightly while retaining the existing five-section navigation, active profile/database selectors, Ctrl+K command palette and persistent map host.
 
 Verification status: not compiled or run by the AI. Static binding review only so far; owner must run `dotnet build FastDbExplorer.slnx`, `dotnet test`, and manually inspect light/dark themes, RTL, home shortcuts, reconnect/disconnect and alert updates on Windows.
+
+
+## P7 — connection, Explorer and monitoring visual pass
+Presentation-only refinements on the core workflows:
+- Connection profiles have clearer profile identity, profile count, and a contained credential-storage note. The connection form has a clearer title block; bindings and password-handling flows are retained.
+- Explorer's table list has a compact count indicator and stronger visual separation between table identity and approximate row count. Query execution remains in the existing TableQueryView/ViewModel path.
+- Monitoring's header uses the available grid space instead of keeping an empty first column; spacing is tuned for the toolbar and alerts panel. All commands, item templates, record previews, report links, and monitor state bindings remain in place.
+
+Verification: XML tag-stack check and static ShellStrings key checks passed for the changed XAML. No .NET build or test has run in this environment; Windows build and end-to-end verification remain required.

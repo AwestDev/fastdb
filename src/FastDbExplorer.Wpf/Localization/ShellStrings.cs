@@ -26,6 +26,7 @@ public static class ShellStrings
     public const string NoSavedProfiles = "هنوز اتصالی ذخیره نشده است.\nبرای ساخت اولین پروفایل روی + بزنید.";
     public const string ProfilePasswordStorageNote = "رمز SQL ذخیره نمی‌شود؛ هنگام اتصال دوباره از شما پرسیده خواهد شد.";
     public const string ProfileDetails = "جزئیات پروفایل";
+    public const string ProfileEditorHint = "اطلاعات سرور و روش ورود را تنظیم کنید.";
     public const string ProfileName = "نام دلخواه";
     public const string NewProfile = "پروفایل تازه";
     public const string SaveProfile = "ذخیره‌ی پروفایل";

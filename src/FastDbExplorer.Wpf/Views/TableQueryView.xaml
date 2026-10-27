@@ -45,10 +45,10 @@
     </Grid.RowDefinitions>
 
     <!-- Header: table name + row count + active filters; settings, cancel, Excel export and Run on the other side -->
-    <Grid Grid.Row="0" Margin="0,0,0,10">
+    <Grid Grid.Row="0" Margin="0,0,0,14">
       <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
       <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{Binding TableName}" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontSize="22"
+        <TextBlock Text="{Binding TableName}" FlowDirection="LeftToRight" HorizontalAlignment="Left" FontSize="24"
                    FontWeight="Bold" TextTrimming="CharacterEllipsis" />
         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
           <TextBlock Text="{x:Static l:Strings.ApproxRows}" Style="{StaticResource Muted}" />
@@ -225,7 +225,7 @@
 
     <!-- Results: a compact map toolbar, then the table takes all the remaining room -->
     <Grid Grid.Row="3">
-      <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="14" Padding="1">
+      <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="16" Padding="2">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
 

@@ -26,6 +26,7 @@ public static class ShellStrings
     public const string NoSavedProfiles = "هنوز اتصالی ذخیره نشده است.\nبرای ساخت اولین پروفایل روی + بزنید.";
     public const string ProfilePasswordStorageNote = "رمز SQL ذخیره نمی‌شود؛ هنگام اتصال دوباره از شما پرسیده خواهد شد.";
     public const string ProfileDetails = "جزئیات پروفایل";
+    public const string ProfileEditorHint = "اطلاعات سرور و روش ورود را تنظیم کنید.";
     public const string ProfileName = "نام دلخواه";
     public const string NewProfile = "پروفایل تازه";
     public const string SaveProfile = "ذخیره‌ی پروفایل";
@@ -46,6 +47,21 @@ public static class ShellStrings
 
     public const string HomeWelcome = "خوش آمدید";
     public const string HomeSubtitle = "کاوش داده‌ها، نقشه و مانیتورینگ هشدارها، همه در یک‌جا.";
+    public const string HomeEyebrow = "نمای کلی فضای کاری";
+    public const string HomeHeroTitle = "داده‌ها را سریع‌تر پیدا کنید؛ با دیدی روشن‌تر.";
+    public const string HomeHeroBody = "از اتصال امن به SQL Server تا جستجو، نقشه و پایش زنده؛ ابزارهای اصلی شما کنار هم هستند.";
+    public const string HomeActiveConnection = "اتصال فعال";
+    public const string HomeQuickStart = "شروع سریع";
+    public const string HomeQuickStartSub = "مسیرهای پرکاربرد برنامه";
+    public const string HomeConnectionHealth = "وضعیت اتصال";
+    public const string HomeDatabaseMetric = "پایگاه‌داده‌های در دسترس";
+    public const string HomeMonitorMetric = "وضعیت مانیتورها";
+    public const string HomeReadOnly = "حالت فقط‌خواندنی";
+    public const string HomeLaunchExplorer = "شروع کاوش";
+    public const string HomeLaunchMap = "باز کردن نقشه";
+    public const string HomeLaunchMonitoring = "مدیریت مانیتورها";
+    public const string HomeActivity = "فعالیت اخیر";
+    public const string HomeLive = "آماده و متصل";
     public const string ExplorerTileHint = "جدول‌ها را ببینید و روی سرور فیلتر کنید.";
     public const string MapTileHint = "نقشه‌ها و لایه‌های مختصات را باز کنید.";
     public const string MonitoringTileHint = "ردیف‌های جدید را زیر نظر بگیرید و هشدار بگیرید.";

@@ -2,14 +2,14 @@
         xmlns:vm="clr-namespace:FastDbExplorer.Wpf.ViewModels"
         xmlns:views="clr-namespace:FastDbExplorer.Wpf.Views"
         xmlns:l="clr-namespace:FastDbExplorer.Wpf.Localization"
-        Title="FastDbExplorer" Icon="pack://application:,,,/Assets/app.ico" Width="1180" Height="760" MinWidth="960" MinHeight="640"
+        Title="FastDbExplorer" Icon="pack://application:,,,/Assets/app.ico" Width="1240" Height="800" MinWidth="960" MinHeight="640"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen" FlowDirection="RightToLeft" UseLayoutRounding="True"
         FontFamily="{StaticResource AppFont}" FontSize="14"
         Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextBrush}">
   <!-- Custom title bar: the system one follows the RTL flow (buttons on the left), so it is replaced by our own. -->
   <WindowChrome.WindowChrome>
-    <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    <WindowChrome CaptionHeight="42" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
   </WindowChrome.WindowChrome>
   <Window.Resources>
     <DataTemplate DataType="{x:Type vm:ConnectionViewModel}"><views:ConnectionsView /></DataTemplate>
@@ -24,7 +24,7 @@
     <!-- Flat caption button; the hover colour comes from BorderBrush so the close button can use red -->
     <Style x:Key="CaptionButton" TargetType="Button">
       <Setter Property="Width" Value="46" />
-      <Setter Property="Height" Value="40" />
+      <Setter Property="Height" Value="42" />
       <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
       <Setter Property="FontSize" Value="10" />
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
@@ -62,7 +62,7 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="Bd" CornerRadius="12" Background="{TemplateBinding Background}" Padding="0,10">
+            <Border x:Name="Bd" CornerRadius="12" Background="{TemplateBinding Background}" Padding="0,11">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
@@ -85,7 +85,7 @@
     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
 
     <!-- Title bar (always left-to-right): icon + name at the top left, window buttons at the top right -->
-    <Border Grid.Row="0" Height="40" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" FlowDirection="LeftToRight">
+    <Border Grid.Row="0" Height="42" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" FlowDirection="LeftToRight">
       <Grid>
         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
@@ -105,7 +105,7 @@
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
 
       <!-- Navigation rail: Home, Connections, Explorer, Map, Monitoring -->
-      <Border Grid.Column="0" Width="84" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
+      <Border Grid.Column="0" Width="88" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
         <ItemsControl ItemsSource="{Binding NavItems}" IsTabStop="False" Margin="8,12,8,8">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
@@ -132,7 +132,7 @@
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
 
         <!-- Top bar: connection status, active profile/database, disconnect -->
-        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="16,8" MinHeight="52">
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="18,9" MinHeight="56">
           <Grid>
             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
 

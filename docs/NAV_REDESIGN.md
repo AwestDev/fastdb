@@ -59,4 +59,12 @@ Verification: balanced XAML tag checks and presence checks for all `MonitoringSt
 - Tuned query header, results-surface corners, and spacing without changing the filter/query/export/map-send commands or the query engine.
 - The table filters, result grid, row selection, paging and cancellation remain on their original ViewModel/code-behind pathways.
 
-Verification: source-only XML tag-stack and binding/resource-name checks are planned for the final branch review. .NET/WPF build, tests and manual UI acceptance remain not run in this environment.
+Verification: source-only XML tag-stack, localized-member, and StaticResource key-name checks completed for all modified XAML. These checks are not a WPF compile. The environment has no .NET SDK (`dotnet` is not installed), so build, automated tests, and manual UI acceptance have not been run.
+
+
+## Final branch review (2026-10-26)
+- Branch: `feature/complete-ui-redesign`; changes are not merged into `main`.
+- UI areas touched: shared shell and theme tokens, connected Home dashboard, connection profiles, Explorer table list, query workspace spacing, monitoring list/editor, map toolbar, and disconnected prompts.
+- Changes are presentation-focused: ViewModel/service/data-query and map/monitoring command logic was not intentionally changed.
+- Static checks: balanced XAML tag-stack check passed for every modified XAML file; referenced `x:Static` localization members and `StaticResource` names were checked with no missing references found.
+- Not verified: `dotnet build`, `dotnet test`, visual rendering, keyboard navigation, accessibility, and end-to-end database/map/monitoring workflows. These require a Windows machine with the .NET 10 SDK and the necessary map assets.

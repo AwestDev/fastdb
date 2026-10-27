@@ -26,7 +26,8 @@ public sealed class MonitorCheckService(
     private const string NearestPointColumn = "Nearest point name";
     private const string CoordinateLayerColumn = "Coordinate layer";
     private const string DistanceColumn = "Distance (m)";
-    private const int MaxDetailColumns = 8;
+    // Nearest point name, coordinate layer, distance: the columns a proximity report adds after the table's own columns.
+    private const int ReportExtraColumns = 3;
     private const int MaxDetailValueLength = 240;
     private const int MaxNameLength = 256;
 
@@ -61,18 +62,24 @@ public sealed class MonitorCheckService(
         // Identity of a record on the map: its primary key values; without a usable key, every selected value.
         var keyIndexes = liveMap ? KeyIndexes(columns, selected) : [];
 
+        // The report and the result table keep exactly the columns they had. The map card's columns are read in addition
+        // (appended after them, so the report rows are trimmed back, see ReportRow).
+        var reportBase = selected.ToList();
+        var reportWidth = reportBase.Count;
+        var detailIndexes = liveMap ? AddDetailColumns(monitor.LiveMapDetailColumns, columns, selected) : [];
+
         var reading = await watermarks.ReadAsync(settings, monitor.Database, monitor.Schema, monitor.Table, watermark.Name, ct);
         var upper = SettleUpper(reading, watermark.TypeName, monitor.SettleSeconds);
 
         // First successful check: remember where we are, do not alert for existing data.
         if (monitor.LastWatermark is null && monitor.LastCheckedUtc is null)
-            return new MonitorCheckResult(monitor.Id, checkedAt, selected, [], false, upper, null, true);
+            return new MonitorCheckResult(monitor.Id, checkedAt, reportBase, [], false, upper, null, true);
 
         var nothingNew = upper is null
                          || (monitor.LastWatermark is not null
                              && WatermarkComparer.Compare(upper, monitor.LastWatermark, watermark.TypeName) <= 0);
         if (nothingNew)
-            return new MonitorCheckResult(monitor.Id, checkedAt, selected, [], false, monitor.LastWatermark, null, false);
+            return new MonitorCheckResult(monitor.Id, checkedAt, reportBase, [], false, monitor.LastWatermark, null, false);
 
         // (last, upper]. No lower bound only when the table was empty at the first check.
         var required = new List<FilterCondition>();
@@ -153,7 +160,7 @@ public sealed class MonitorCheckService(
                 {
                     // Not a report row. It may still be a map point when the user asked for all matching records.
                     if (liveAll && located)
-                        mapPoints.Add(BuildLivePoint(candidate, selected, keyIndexes, latitude, longitude));
+                        mapPoints.Add(BuildLivePoint(candidate, selected, keyIndexes, detailIndexes, latitude, longitude));
                     continue;
                 }
                 if (capReached)
@@ -161,10 +168,10 @@ public sealed class MonitorCheckService(
                     throw new InvalidOperationException($"Monitor '{monitor.Name}' matched more than {MaxRows:N0} rows with the same watermark value. It cannot safely resume without skipping records; choose a watermark column with fewer ties or split the monitor conditions.");
                 }
 
-                rows.Add(matched);
+                rows.Add(ReportRow(matched, reportWidth, layers.Count > 0 ? ReportExtraColumns : 0));
                 if (liveMap)
                 {
-                    if (located) mapPoints.Add(BuildLivePoint(candidate, selected, keyIndexes, latitude, longitude));
+                    if (located) mapPoints.Add(BuildLivePoint(candidate, selected, keyIndexes, detailIndexes, latitude, longitude));
                     else mapSkipped++;
                 }
 
@@ -181,8 +188,8 @@ public sealed class MonitorCheckService(
         var next = truncated ? capWatermark : upper;
 
         var reportColumns = layers.Count == 0
-            ? selected
-            : selected.Concat([NearestPointColumn, CoordinateLayerColumn, DistanceColumn]).ToList();
+            ? reportBase
+            : reportBase.Concat([NearestPointColumn, CoordinateLayerColumn, DistanceColumn]).ToList();
         string? reportPath = null;
         if (rows.Count > 0)
             reportPath = await reports.WriteAsync(monitor.Name, checkedAt, reportColumns, rows, monitor.OutputFolder, ct);
@@ -278,7 +285,44 @@ public sealed class MonitorCheckService(
         return isLatitude ? CoordinateRules.IsValidLatitude(parsed) : CoordinateRules.IsValidLongitude(parsed);
     }
 
-    private static LiveMapPoint BuildLivePoint(object?[] row, IReadOnlyList<string> selected, int[] keyIndexes, double latitude, double longitude)
+    /// <summary>
+    /// Appends the columns the user chose for the map card to the query and returns their positions. Unknown columns
+    /// (removed from the table since the choice) are skipped. A monitor without a choice shows the first columns, as before.
+    /// </summary>
+    private static int[] AddDetailColumns(IReadOnlyList<string>? chosen, IReadOnlyList<ColumnInfo> columns, List<string> selected)
+    {
+        if (chosen is null)
+            return Enumerable.Range(0, Math.Min(selected.Count, MonitorDefinition.DefaultLiveMapDetailColumns)).ToArray();
+
+        var indexes = new List<int>();
+        foreach (var name in chosen.Take(MonitorDefinition.MaxLiveMapDetailColumns))
+        {
+            var column = columns.FirstOrDefault(c => c.IsFilterable && string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (column is null) continue;
+
+            var index = selected.FindIndex(c => string.Equals(c, column.Name, StringComparison.Ordinal));
+            if (index < 0)
+            {
+                selected.Add(column.Name);
+                index = selected.Count - 1;
+            }
+            if (!indexes.Contains(index)) indexes.Add(index);
+        }
+        return [.. indexes];
+    }
+
+    /// <summary>A stored row without the map-only columns: the table's columns, then the proximity columns when a layer is watched.</summary>
+    private static object?[] ReportRow(object?[] row, int reportWidth, int extraColumns)
+    {
+        if (row.Length == reportWidth + extraColumns) return row;
+
+        var trimmed = new object?[reportWidth + extraColumns];
+        Array.Copy(row, trimmed, reportWidth);
+        Array.Copy(row, row.Length - extraColumns, trimmed, reportWidth, extraColumns);
+        return trimmed;
+    }
+
+    private static LiveMapPoint BuildLivePoint(object?[] row, IReadOnlyList<string> selected, int[] keyIndexes, int[] detailIndexes, double latitude, double longitude)
     {
         var key = string.Join('\u001f', keyIndexes.Select(index => FormatPart(row[index])));
 
@@ -287,11 +331,11 @@ public sealed class MonitorCheckService(
         if (name.Length > MaxNameLength) name = name[..MaxNameLength];
 
         var details = new Dictionary<string, string>(StringComparer.Ordinal);
-        for (var i = 0; i < selected.Count && details.Count < MaxDetailColumns; i++)
+        foreach (var index in detailIndexes)
         {
-            var text = FormatPart(row[i]);
+            var text = FormatPart(row[index]);
             if (text.Length > MaxDetailValueLength) text = text[..MaxDetailValueLength];
-            details[selected[i]] = text;
+            details[selected[index]] = text;
         }
 
         return new LiveMapPoint(key, name, latitude, longitude, details);

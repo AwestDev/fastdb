@@ -79,12 +79,22 @@
   }
 
   // The details of a point (an object, or its JSON text) as a small two-column list; null when there is nothing to show.
-  function detailList(details) {
+  // Most rows a card shows; the monitor's column choice is capped to the same number (MonitorDefinition.MaxLiveMapDetailColumns).
+  const MAX_DETAIL_ROWS = 20;
+  // A card with more rows than this is a "detailed" card: at most MAX_DETAILED_CARDS of them are shown at once.
+  const DETAILED_ROWS = 3;
+  const MAX_DETAILED_CARDS = 3;
+
+  function detailEntries(details) {
     if (typeof details === 'string') {
       try { details = JSON.parse(details); } catch (_) { details = null; }
     }
-    if (!details || typeof details !== 'object' || Array.isArray(details)) return null;
-    const entries = Object.entries(details).slice(0, 8);
+    if (!details || typeof details !== 'object' || Array.isArray(details)) return [];
+    return Object.entries(details).slice(0, MAX_DETAIL_ROWS);
+  }
+
+  function detailList(details) {
+    const entries = detailEntries(details);
     if (!entries.length) return null;
     const list = document.createElement('div');
     list.className = 'coord-detail';
@@ -128,6 +138,7 @@
     cardBox.style.cssText = 'position:absolute;left:12px;top:12px;z-index:6;display:none;flex-direction:column;gap:8px;' +
       'width:min(320px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;';
     document.body.appendChild(cardBox);
+    window.addEventListener('resize', () => { if (selected.size) renderCards(); });
     return cardBox;
   }
 
@@ -169,11 +180,42 @@
     return c;
   }
 
-  function renderCards() {
-    const box = ensureCards();
+  // The cards start under the coordinate toolbar (map-tools.js), never on top of it.
+  function cardsTop() {
+    const bar = document.querySelector('.mt-top');
+    return bar ? Math.round(bar.getBoundingClientRect().bottom) + 8 : 12;
+  }
+
+  function paintCards(box) {
     box.textContent = '';
     for (const entry of selected.values()) box.appendChild(buildCard(entry));
     box.style.display = selected.size ? 'flex' : 'none';
+  }
+
+  // Two limits. At most MAX_DETAILED_CARDS detailed cards: the oldest detailed ones go first. The stack must fit between
+  // the toolbar and the bottom of the map: the oldest card goes first until it does. Points with little information
+  // stack as many as fit.
+  function renderCards() {
+    const box = ensureCards();
+    const top = cardsTop();
+    box.style.top = top + 'px';
+    box.style.maxHeight = Math.max(120, window.innerHeight - top - 12) + 'px';
+
+    let dropped = false;
+    const detailed = [...selected.values()].filter((e) => detailEntries(e.details).length > DETAILED_ROWS);
+    for (let i = 0; i < detailed.length - MAX_DETAILED_CARDS; i++) { selected.delete(detailed[i].key); dropped = true; }
+
+    paintCards(box);
+    while (selected.size > 1 && box.scrollHeight > box.clientHeight) {
+      selected.delete(selected.keys().next().value);
+      dropped = true;
+      paintCards(box);
+    }
+
+    if (dropped) {
+      drawSelection();
+      if (!selected.size) window.dispatchEvent(new CustomEvent('coordselectclear'));
+    }
   }
 
   function showTip(point, name, layerName, details) {

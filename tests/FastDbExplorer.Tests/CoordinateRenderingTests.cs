@@ -117,7 +117,7 @@ public class CoordinateRenderingTests
     public void GeoJson_query_point_details_are_bounded_and_optional()
     {
         var id = Guid.NewGuid();
-        var details = Enumerable.Range(0, 10)
+        var details = Enumerable.Range(0, 25)
             .ToDictionary(index => $"Field {index}", index => new string('x', index == 0 ? 400 : 50));
         var point = new MapPoint(Guid.NewGuid(), "Query row", 35.7, 51.4, id, details);
         var layer = new MapLayer(id, "Query results", "dbo.Sample", [point]);
@@ -126,10 +126,11 @@ public class CoordinateRenderingTests
         var serializedDetails = (JsonObject)properties["details"]!;
 
         Assert.Equal("Query row", properties["name"]!.GetValue<string>());
-        Assert.Equal(8, serializedDetails.Count);
+        // 20 fields is the card's limit (MonitorDefinition.MaxLiveMapDetailColumns); the rest are dropped.
+        Assert.Equal(20, serializedDetails.Count);
         Assert.All(serializedDetails.Select(pair => pair.Value!.GetValue<string>()), value => Assert.True(value.Length <= 240));
         Assert.Equal(240, serializedDetails["Field 0"]!.GetValue<string>().Length);
-        Assert.True(serializedDetails.Sum(pair => pair.Key.Length + pair.Value!.GetValue<string>().Length) <= 1_200);
+        Assert.True(serializedDetails.Sum(pair => pair.Key.Length + pair.Value!.GetValue<string>().Length) <= 2_400);
     }
 
     [Fact]

@@ -66,6 +66,8 @@ public static class MonitoringStrings
     public const string LiveMapDurationHint = "هر نتیجه از زمان آخرین پیدا شدنش روی نقشه می‌ماند. اگر همان رکورد در بررسی بعدی دوباره پیدا شود، زمانش از نو شروع می‌شود. حذف از نقشه، رکورد دیتابیس و فایل اکسل را تغییر نمی‌دهد.";
     public const string LiveMapShowAllTitle = "روی نقشه همه رکوردهای منطبق با شرط‌ها را نشان بده، حتی خارج از شعاع";
     public const string LiveMapShowAllHint = "فقط نقشه تغییر می‌کند: رکوردهای خارج از شعاع در گزارش نمی‌آیند ولی روی نقشه دیده می‌شوند.";
+    public const string LiveMapDetailTitle = "ستون‌هایی که با کلیک روی نقطه، روی کارت نقشه نشان داده شوند";
+    public const string LiveMapDetailHint = "حداکثر ۲۰ ستون. این ستون‌ها از همان رکورد خوانده می‌شوند؛ نیازی به جستجو در کاوشگر نیست.";
     public const string LiveMapStyleTitle = "نماد و رنگ این مانیتور روی نقشه";
     public const string LiveMapIconLabel = "نماد";
     public const string LiveMapColorLabel = "رنگ";

@@ -274,6 +274,20 @@
                       Visibility="{Binding ShowLiveMapShowAll, Converter={StaticResource BoolToVis}}" />
             <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapShowAllHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"
                        Visibility="{Binding ShowLiveMapShowAll, Converter={StaticResource BoolToVis}}" />
+
+            <!-- Columns of the record that show on its map card when the point is clicked -->
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapDetailTitle}" Style="{StaticResource FieldLabel}" Margin="0,12,0,0" />
+            <TextBlock Text="{x:Static l:MonitoringStrings.LiveMapDetailHint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,6" />
+            <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding LiveMapDetailChoices}" IsTabStop="False">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,0,16,6" FlowDirection="LeftToRight" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
           </StackPanel>
         </StackPanel>
       </Border>

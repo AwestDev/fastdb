@@ -21,6 +21,7 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
     private readonly MonitorDefinition? _existing;
     private readonly CancellationTokenSource _lifetime = new();
     private IReadOnlyList<ColumnInfo> _columns = [];   // full column metadata (needed for datetime detection + dry-run)
+    private List<string>? _liveMapDetailSelection;     // columns shown on a live map point card; null = never chosen (the first columns)
 
     public MonitorEditorViewModel(
         IDatabaseMetadataService metadata, ConnectionSettings settings, IReadOnlyList<DatabaseInfo> databases,
@@ -51,6 +52,7 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
             _liveMapShowAll = existing.LiveMapShowAllMatches;
             _liveMapIconKey = existing.LiveMapIconKey ?? "";
             _liveMapColor = existing.LiveMapColor ?? MapSourceStyles.MonitoringColor;
+            _liveMapDetailSelection = existing.LiveMapDetailColumns?.ToList();
             _selectedLatitudeColumn = existing.LatitudeColumn;
             _selectedLongitudeColumn = existing.LongitudeColumn;
             _distanceText = existing.DistanceMeters?.ToString("R", CultureInfo.InvariantCulture) ?? "20000";
@@ -94,6 +96,33 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
     public IReadOnlyList<IconCategoryChoice> LiveMapIconCategories { get; }
 
     public IReadOnlyList<ColorChoice> LiveMapColorChoices { get; }
+
+    /// <summary>The table's filterable columns as checkboxes: the ones that show on a live map point card when it is clicked.</summary>
+    public ObservableCollection<MapDetailColumnItem> LiveMapDetailChoices { get; } = [];
+
+    private void RebuildLiveMapDetailChoices()
+    {
+        var names = _columns.Where(c => c.IsFilterable).Select(c => c.Name).ToList();
+        var chosen = (_liveMapDetailSelection ?? new List<string>())
+            .Where(name => names.Contains(name, StringComparer.OrdinalIgnoreCase)).ToList();
+        if (chosen.Count == 0) chosen = names.Take(MonitorDefinition.DefaultLiveMapDetailColumns).ToList();
+
+        LiveMapDetailChoices.Clear();
+        foreach (var name in names)
+            LiveMapDetailChoices.Add(new MapDetailColumnItem(
+                name, chosen.Contains(name, StringComparer.OrdinalIgnoreCase), OnLiveMapDetailChanged));
+        _liveMapDetailSelection = chosen;
+    }
+
+    private void OnLiveMapDetailChanged(MapDetailColumnItem item, bool value)
+    {
+        if (value && LiveMapDetailChoices.Count(c => c.IsSelected) > MonitorDefinition.MaxLiveMapDetailColumns)
+        {
+            item.IsSelected = false; // the card has room for MaxLiveMapDetailColumns columns: the extra tick is refused
+            return;
+        }
+        _liveMapDetailSelection = LiveMapDetailChoices.Where(c => c.IsSelected).Select(c => c.Name).ToList();
+    }
 
     [ObservableProperty] private bool _isLiveMapIconPickerOpen;
     [ObservableProperty] private IconCategoryChoice? _selectedLiveMapIconCategory;
@@ -271,6 +300,7 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
         WatermarkColumns = _columns.Where(c => WatermarkTypes.IsSupported(c.TypeName)).Select(c => c.Name).ToList();
         FilterableColumns = _columns.Where(c => c.IsFilterable).Select(c => c.Name).ToList();
         CoordinateColumns = _columns.Where(c => MonitorCoordinateTypes.IsSupported(c.TypeName)).Select(c => c.Name).ToList();
+        RebuildLiveMapDetailChoices();
 
         if (IsNew)
         {
@@ -347,6 +377,7 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
         var liveMapShowAll = liveMapRequested && proximityRequested && LiveMapShowAll;
         var liveMapIcon = MapMarkerCatalog.Find(LiveMapIconKey) is { } chosenIcon ? chosenIcon.Key : null;
         var liveMapColor = MapMarkerCatalog.IsValidColor(LiveMapColor) ? LiveMapColor.ToUpperInvariant() : null;
+        var liveMapDetails = _liveMapDetailSelection?.ToList();
         var layerIds = proximityRequested
             ? CoordinateLayerChoices.Where(choice => choice.IsSelected).Select(choice => choice.Layer.Id).ToList()
             : [];
@@ -417,7 +448,8 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
                 LatitudeColumn: latitudeColumn, LongitudeColumn: longitudeColumn, DistanceMeters: distanceMeters,
                 CoordinateLayerIds: coordinateLayerIds, LiveMapEnabled: liveMapRequested,
                 LiveMapIconKey: liveMapIcon, LiveMapColor: liveMapColor,
-                LiveMapMinutes: LiveResultLifetime.Normalize(LiveMapMinutes), LiveMapShowAllMatches: liveMapShowAll)
+                LiveMapMinutes: LiveResultLifetime.Normalize(LiveMapMinutes), LiveMapShowAllMatches: liveMapShowAll,
+                LiveMapDetailColumns: liveMapDetails)
             : _existing with { Name = name, Conditions = conditions, Logic = logic,
                                IntervalMinutes = minutes, OutputFolder = folder, PlaySound = sound,
                                CoordinateLayerId = coordinateLayerIds is { Count: 1 } ? coordinateLayerIds[0] : null,
@@ -426,7 +458,8 @@ public sealed partial class MonitorEditorViewModel : ObservableObject, IDisposab
                                LiveMapEnabled = liveMapRequested,
                                LiveMapMinutes = LiveResultLifetime.Normalize(LiveMapMinutes),
                                LiveMapShowAllMatches = liveMapShowAll,
-                               LiveMapIconKey = liveMapIcon, LiveMapColor = liveMapColor };
+                               LiveMapIconKey = liveMapIcon, LiveMapColor = liveMapColor,
+                               LiveMapDetailColumns = liveMapDetails };
 
         Saved?.Invoke(definition);
     }

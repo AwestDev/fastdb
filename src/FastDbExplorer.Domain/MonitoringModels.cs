@@ -57,10 +57,17 @@ public sealed record MonitorDefinition(
     int LiveMapMinutes = LiveResultLifetime.DefaultMinutes,
     bool LiveMapShowAllMatches = false,
     string? LiveMapIconKey = null,
-    string? LiveMapColor = null)
+    string? LiveMapColor = null,
+    IReadOnlyList<string>? LiveMapDetailColumns = null)
 {
     public const int MinIntervalMinutes = 1;
     public const int MaxIntervalMinutes = 1440;
+
+    /// <summary>Most columns a live map point card can show. More would not fit the card or the screen.</summary>
+    public const int MaxLiveMapDetailColumns = 20;
+
+    /// <summary>Monitors saved before the column choice existed show this many columns on their map cards.</summary>
+    public const int DefaultLiveMapDetailColumns = 8;
 
     [JsonIgnore]
     public string TargetText => $"{Database} · {Schema}.{Table}";

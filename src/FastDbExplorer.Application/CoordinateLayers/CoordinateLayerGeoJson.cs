@@ -10,10 +10,11 @@ namespace FastDbExplorer.Application.CoordinateLayers;
 /// </summary>
 public static class CoordinateLayerGeoJson
 {
-    private const int MaxDetailFields = 8;
+    // Same limit as the monitor's column choice (MonitorDefinition.MaxLiveMapDetailColumns): every chosen column reaches the card.
+    private const int MaxDetailFields = 20;
     private const int MaxDetailKeyLength = 80;
     private const int MaxDetailValueLength = 240;
-    private const int MaxDetailTextLength = 1_200;
+    private const int MaxDetailTextLength = 2_400;
 
     /// <summary>One Point feature per layer point, with its name (for the label).</summary>
     public static JsonObject Points(MapLayer layer)

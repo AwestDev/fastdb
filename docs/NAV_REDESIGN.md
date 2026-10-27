@@ -43,3 +43,12 @@ Presentation-only refinements on the core workflows:
 - Monitoring's header uses the available grid space instead of keeping an empty first column; spacing is tuned for the toolbar and alerts panel. All commands, item templates, record previews, report links, and monitor state bindings remain in place.
 
 Verification: XML tag-stack check and static ShellStrings key checks passed for the changed XAML. No .NET build or test has run in this environment; Windows build and end-to-end verification remain required.
+
+
+## P8 — monitor editor and map toolbar refinement
+- Grouped primary monitor identity/source/watermark settings into one clear card, with a localized section title and supporting hint.
+- Grouped schedule interval, report output folder, and sound preference into a separate card so users can scan the setup in a predictable order.
+- Added the supporting Persian strings in `MonitoringStrings.cs`.
+- Refined map toolbar breathing room and visual hierarchy only; map commands, context-menu handlers, visibility triggers, WebView2 host, and side-panel structure remain unchanged.
+
+Verification: balanced XAML tag checks and presence checks for all `MonitoringStrings` references passed for the edited editor and map view source. This does not replace a WPF compile. Build, automated tests, and manual map/monitor editing tests are still required on Windows.

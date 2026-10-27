@@ -46,6 +46,10 @@ public static class MonitoringStrings
     public const string EditorTitleNew = "مانیتور جدید";
     public const string EditorTitleEdit = "ویرایش مانیتور";
     public const string Name = "نام مانیتور";
+    public const string MainSettings = "مشخصات اصلی مانیتور";
+    public const string MainSettingsHint = "منبع داده و ستون تشخیص رکوردهای جدید را مشخص کنید.";
+    public const string ScheduleSection = "زمان‌بندی و گزارش";
+    public const string ScheduleSectionHint = "فاصله‌ی بررسی‌ها و محل ذخیره‌ی گزارش‌های خروجی را تنظیم کنید.";
     public const string Database = "پایگاه‌داده";
     public const string Table = "جدول";
     public const string Target = "جدول موردنظر";

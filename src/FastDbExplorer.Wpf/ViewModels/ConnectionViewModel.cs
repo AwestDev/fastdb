@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FastDbExplorer.Application.Abstractions;
 using FastDbExplorer.Domain;
+using FastDbExplorer.Infrastructure;
 using FastDbExplorer.Wpf.Localization;
 
 namespace FastDbExplorer.Wpf.ViewModels;
@@ -27,6 +28,9 @@ public sealed partial class ConnectionViewModel : ObservableObject
     }
 
     public event Action<ConnectionSettings, IReadOnlyList<DatabaseInfo>, SavedConnection>? Connected;
+
+    /// <summary>The connection works, but its login can change data. The app stays read-only; the user is told.</summary>
+    public event Action? WriteAccessDetected;
     public event Action<SavedConnection>? ProfileDeleted;
 
     /// <summary>True after a failed connect that the user fixes in the Connections form (password missing or rejected).</summary>
@@ -224,7 +228,9 @@ public sealed partial class ConnectionViewModel : ObservableObject
             var databases = await _metadata.GetDatabasesAsync(settings, cts.Token);
             cts.Token.ThrowIfCancellationRequested();
             StatusMessage = Strings.TestOk;
+            var canWrite = await SqlServerAccessProbe.CanWriteAsync(settings, cts.Token);
             Connected?.Invoke(settings, databases, saved);
+            if (canWrite == true) WriteAccessDetected?.Invoke();
             return true;
         }
         catch (OperationCanceledException)

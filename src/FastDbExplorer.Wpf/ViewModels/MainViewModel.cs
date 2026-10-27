@@ -70,6 +70,7 @@ public sealed partial class MainViewModel : ObservableObject
             ShellStrings.HomePromptTitle, ShellStrings.HomePromptBody, "\uE716", () => Navigate(AppSection.Connections));
 
         _connection.Connected += OnConnected;
+        _connection.WriteAccessDetected += () => WriteAccessDetected?.Invoke();
         _connection.ProfileDeleted += OnProfileDeleted;
         _connection.Profiles.CollectionChanged += (_, _) => RefreshActiveProfile();
         _map.BackRequested += () => Navigate(AppSection.Home);
@@ -79,6 +80,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>Raised when the Ctrl+K palette should open; the window (view layer) shows it.</summary>
     public event Action<CommandPaletteViewModel>? PaletteRequested;
+
+    /// <summary>Raised after a connection whose login can change data; the window (view layer) shows the warning.</summary>
+    public event Action? WriteAccessDetected;
 
     public IReadOnlyList<NavItemViewModel> NavItems { get; }
     public IReadOnlyList<SavedConnection> Profiles => _connection.Profiles;

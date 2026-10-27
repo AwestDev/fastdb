@@ -40,6 +40,9 @@ public static class ShellStrings
     public const string SqlPasswordPromptNote = "رمز فقط برای این نشست استفاده می‌شود و در پروفایل یا فایل تنظیمات ذخیره نخواهد شد.";
     public const string PasswordPromptUnavailable = "پنجره‌ی امن ورود رمز در دسترس نیست.";
     public const string ActiveProfile = "پروفایل فعال";
+    public const string WriteAccessWarning =
+        "کاربر این اتصال دسترسی نوشتن در پایگاه داده دارد (نقش نوشتن، مالک دیتابیس، sysadmin یا مجوز تغییر).\n\n"
+        + "برنامه فقط خواندنی است و چیزی نمی‌نویسد، اما برای امنیت بهتر است از یک کاربر فقط‑خواندنی استفاده کنید.";
 
     public const string HomeWelcome = "خوش آمدید";
     public const string HomeSubtitle = "کاوش داده‌ها، نقشه و مانیتورینگ هشدارها، همه در یک‌جا.";

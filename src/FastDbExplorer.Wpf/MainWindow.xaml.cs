@@ -21,6 +21,7 @@ public partial class MainWindow : Window
         StateChanged += (_, _) => UpdateMaximizeState();
         PreviewKeyDown += OnSectionShortcut;
         viewModel.PaletteRequested += OnPaletteRequested;
+        viewModel.WriteAccessDetected += OnWriteAccessDetected;
         viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentView)) SyncMapHost();
@@ -117,6 +118,11 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK,
                 MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading);
     }
+
+    private void OnWriteAccessDetected() =>
+        MessageBox.Show(this, ShellStrings.WriteAccessWarning, WindowStrings.AppName,
+            MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK,
+            MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading);
 
     private void OnPaletteRequested(CommandPaletteViewModel palette)
     {

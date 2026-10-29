@@ -74,8 +74,8 @@
       </Setter>
       <Style.Triggers>
         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-          <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
-          <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+          <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+          <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
         </DataTrigger>
       </Style.Triggers>
     </Style>
@@ -106,7 +106,11 @@
 
       <!-- Navigation rail: Home, Connections, Explorer, Map, Monitoring -->
       <Border Grid.Column="0" Width="84" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
-        <ItemsControl ItemsSource="{Binding NavItems}" IsTabStop="False" Margin="8,12,8,8">
+        <StackPanel Margin="8,12,8,8">
+          <!-- App logo above the navigation -->
+          <Image Source="pack://application:,,,/Assets/logo.png" Width="44" Height="44" Margin="0,0,0,16" HorizontalAlignment="Center"
+                 RenderOptions.BitmapScalingMode="HighQuality" />
+          <ItemsControl ItemsSource="{Binding NavItems}" IsTabStop="False" Margin="0">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <Button Style="{StaticResource NavButton}" ToolTip="{Binding ToolTipText}"
@@ -126,6 +130,7 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+        </StackPanel>
       </Border>
 
       <Grid Grid.Column="1">

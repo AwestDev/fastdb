@@ -28,11 +28,20 @@ public static class SelectQueryBuilder
             byName.TryGetValue(name, out var c) ? c : throw new ArgumentException($"Unknown column '{name}'.");
 
         if (request.Columns.Count == 0) throw new ArgumentException("Select at least one column.");
-        if (request.OrderBy.Count == 0) throw new ArgumentException("An ORDER BY column is required for paging.");
+        if (request.OrderBy.Count == 0 && request.Spatial is null)
+            throw new ArgumentException("An ORDER BY column is required for paging.");
         if (request.Filters.Count + (request.RequiredFilters?.Count ?? 0) > MaxFilters)
             throw new ArgumentException($"At most {MaxFilters} filters are allowed.");
         if (request.AfterKey is not null && (!request.UseKeyset || request.AfterKey.Length != request.OrderBy.Count))
             throw new ArgumentException("Invalid keyset position.");
+
+        if (request.Spatial is not null)
+        {
+            // Nearby search pages by offset: ordering is by distance, which keyset paging cannot follow.
+            if (request.AfterKey is not null) throw new ArgumentException("Nearby search does not support key paging.");
+            SpatialSearch.Validate(request.Spatial.Latitude, request.Spatial.Longitude, request.Spatial.RadiusMeters);
+            request = request with { UseKeyset = false };
+        }
 
         var pageSize = Math.Clamp(request.PageSize, 1, MaxPageSize);
         var parameters = new List<QueryParameter>();
@@ -55,6 +64,22 @@ public static class SelectQueryBuilder
                 select.Add($"{Quote(Col(request.OrderBy[i]).Name)} AS {alias}"); // lets the caller read the last key
             }
 
+        string? distanceSql = null;
+        string? spatialWhere = null;
+        if (request.Spatial is { } spatial)
+        {
+            var target = spatial.GeographyColumn is not null
+                ? new SpatialTarget(SpatialMode.GeographyColumn, null, null, spatial.GeographyColumn)
+                : new SpatialTarget(SpatialMode.LatLonColumns, spatial.LatitudeColumn, spatial.LongitudeColumn, null);
+            var latParam = Add(SqlDbType.Float, spatial.Latitude);
+            var lonParam = Add(SqlDbType.Float, spatial.Longitude);
+            var radiusParam = Add(SqlDbType.Float, spatial.RadiusMeters);
+            var (distance, present) = SpatialSearch.Expressions(target, latParam, lonParam, name => Quote(Col(name).Name));
+            distanceSql = distance;
+            select.Add($"{distance} AS {Quote(SpatialSearch.DistanceAlias)}");
+            spatialWhere = $"{present} AND {distance} <= {radiusParam}";
+        }
+
         var where = new List<string>();
         var filters = request.Filters.Select(f => BuildFilter(f, Col(f.Column), Add)).ToList();
         if (filters.Count > 0)
@@ -63,11 +88,16 @@ public static class SelectQueryBuilder
             where.AddRange(request.RequiredFilters.Select(f => BuildFilter(f, Col(f.Column), Add)).ToList());
         if (request.AfterKey is not null)
             where.Add(BuildKeyset(request, Col, Add));
+        if (spatialWhere is not null)
+            where.Add(spatialWhere);
 
-        var orderBy = string.Join(", ", request.OrderBy.Select(c => Quote(Col(c).Name) + " ASC"));
+        var orderTerms = request.OrderBy.Select(c => Quote(Col(c).Name) + " ASC").ToList();
+        if (distanceSql is not null) orderTerms.Insert(0, distanceSql + " ASC");
+        var orderBy = string.Join(", ", orderTerms);
         var from = $"{Quote(request.Schema)}.{Quote(request.Table)}";
         var whereSql = where.Count > 0 ? " WHERE " + string.Join(" AND ", where) : "";
-        var outputColumns = visibleColumns.Concat(keyAliases).ToList();
+        var distanceOutput = distanceSql is null ? new List<string>() : new List<string> { Quote(SpatialSearch.DistanceAlias) };
+        var outputColumns = visibleColumns.Concat(distanceOutput).Concat(keyAliases).ToList();
         string sql;
 
         if (supportsOffsetFetch)

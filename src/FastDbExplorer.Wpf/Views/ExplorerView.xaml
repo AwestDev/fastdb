@@ -79,17 +79,22 @@
         <TextBlock Text="{x:Static l:Strings.EmptySubtitle}" Style="{StaticResource Muted}" TextAlignment="Center" />
       </StackPanel>
     </Grid>
-    <!-- Point handed over from the map. Radius and search come next; here the point can be checked and cleared. -->
-    <Border Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,12,0,0" Padding="16,8"
-            CornerRadius="12" Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
-            Visibility="{Binding IsSearchPointSet, Converter={StaticResource BoolToVis}}">
-      <StackPanel Orientation="Horizontal">
-        <TextBlock Text="نقطه‌ی جستجو:" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
-        <TextBlock Text="{Binding SearchPointText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
-                   VerticalAlignment="Center" Margin="6,0,18,0" />
-        <TextBlock Text="شعاع (متر):" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
-        <TextBox Text="{Binding SearchRadiusMeters, UpdateSourceTrigger=PropertyChanged}" Width="90" Margin="6,0,18,0" />
-        <Button Content="پاک کردن نقطه" Command="{Binding ClearSearchPointCommand}" Padding="10,4" />
+    <!-- Nearby search: enter a point by hand, or choose one on the map. The radius is in metres. -->
+    <Border Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,12,0,0" Padding="16,10"
+            CornerRadius="12" Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+      <StackPanel>
+        <WrapPanel>
+          <TextBlock Text="عرض جغرافیایی:" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="0,0,6,0" />
+          <TextBox Width="120" Text="{Binding SearchLatitudeText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,14,0" />
+          <TextBlock Text="طول جغرافیایی:" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="0,0,6,0" />
+          <TextBox Width="120" Text="{Binding SearchLongitudeText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,14,0" />
+          <TextBlock Text="شعاع (متر):" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="0,0,6,0" />
+          <TextBox Width="90" Text="{Binding SearchRadiusText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,14,0" />
+          <Button Content="جستجو" Command="{Binding ApplyManualPointCommand}" Padding="12,4" Margin="0,0,8,0" />
+          <Button Content="پاک کردن" Command="{Binding ClearSearchPointCommand}" Padding="12,4" />
+        </WrapPanel>
+        <TextBlock Text="{Binding SearchError}" Foreground="{DynamicResource DangerBrush}" FontSize="12" Margin="0,6,0,0" />
+        <TextBlock Text="{Binding SearchPointText}" Foreground="{DynamicResource AccentBrush}" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0" />
       </StackPanel>
     </Border>
   </Grid>

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FastDbExplorer.Application.Abstractions;
 using FastDbExplorer.Domain;
+using FastDbExplorer.Infrastructure;
 using FastDbExplorer.Wpf.Localization;
 using FastDbExplorer.Wpf.Services;
 
@@ -48,6 +49,9 @@ public sealed partial class ColumnItem(ColumnInfo info) : ObservableObject
     [ObservableProperty] private bool _isSelected;
 }
 
+/// <summary>A nearby-search point chosen by the user: the centre and the radius in metres.</summary>
+public sealed record SearchPoint(double Latitude, double Longitude, double RadiusMeters);
+
 public sealed partial class TableQueryViewModel : ObservableObject
 {
     private const long KeysetThreshold = 10_000;
@@ -68,6 +72,30 @@ public sealed partial class TableQueryViewModel : ObservableObject
     private readonly Stack<PageCursor> _history = new();
     private List<ColumnInfo> _keyColumns = [];
     private IReadOnlyList<ColumnInfo> _columnMeta = [];
+    private SearchPoint? _searchPoint;
+
+    /// <summary>The nearby-search point in effect for this table, or null.</summary>
+    public SearchPoint? CurrentSearchPoint => _searchPoint;
+
+    /// <summary>
+    /// Sets or clears the nearby point. Runs the query when the table is ready, or when a result is on screen
+    /// (so clearing the point refreshes it). Before the columns are loaded, InitializeAsync runs it.
+    /// </summary>
+    public void SetSearchPoint(SearchPoint? point)
+    {
+        _searchPoint = point;
+        if (Columns.Count > 0 && (point is not null || HasResult) && CanRun())
+            RunCommand.Execute(null);
+    }
+
+    private SpatialTarget? ResolveSpatialTarget()
+    {
+        // Columns the user picked for the map win; otherwise detect them from the table.
+        if (LatitudeColumn is not null && LongitudeColumn is not null && LatitudeColumn != LongitudeColumn
+            && _columnMeta.Any(c => c.Name == LatitudeColumn) && _columnMeta.Any(c => c.Name == LongitudeColumn))
+            return new SpatialTarget(SpatialMode.LatLonColumns, LatitudeColumn, LongitudeColumn, null);
+        return SpatialSearch.Detect(_columnMeta);
+    }
     private IReadOnlyList<string> _displayColumns = [];
     private PageCursor _current = new(0, null);
     private PageRequest? _base;
@@ -173,6 +201,8 @@ public sealed partial class TableQueryViewModel : ObservableObject
         catch (OperationCanceledException) { }
         catch (DatabaseAccessException ex) { ErrorMessage = Strings.Describe(ex); }
         finally { IsLoadingColumns = false; }
+        // A point chosen before the columns were ready runs now.
+        if (_searchPoint is not null && Columns.Count > 0 && CanRun()) RunCommand.Execute(null);
     }
 
     public void Shutdown() => _lifetime.Cancel();
@@ -587,15 +617,27 @@ public sealed partial class TableQueryViewModel : ObservableObject
                 row.NeedsValue ? row.Value : null, row.NeedsSecondValue ? row.Value2 : null));
         }
 
+        SpatialCondition? spatial = null;
+        if (_searchPoint is { } point)
+        {
+            var target = ResolveSpatialTarget();
+            if (target is null) { ErrorMessage = Strings.ErrNoCoordinateColumns; return false; }
+            spatial = new SpatialCondition(target.GeographyColumn, target.LatColumn, target.LonColumn,
+                point.Latitude, point.Longitude, point.RadiusMeters);
+        }
+
+        // With a nearby point, the rows are ordered by distance, so the primary key or the chosen order is optional.
         IReadOnlyList<string> order;
         if (UsesPrimaryKey) order = _keyColumns.Select(c => c.Name).ToList();
         else if (OrderColumn is not null) order = [OrderColumn];
+        else if (spatial is not null) order = [];
         else { ErrorMessage = Strings.ErrPickOrder; return false; }
 
-        displayColumns = selected;
+        displayColumns = spatial is null ? selected : selected.Append(SpatialSearch.DistanceAlias).ToList();
         var queryColumns = selected.Concat(GetMapRequiredColumns()).Distinct(StringComparer.Ordinal).ToList();
         request = new PageRequest(_database, _table.Schema, _table.Name, queryColumns, filters,
-            UseOr ? FilterLogic.Or : FilterLogic.And, order, UsesPrimaryKey, PageSize, 0, null);
+            UseOr ? FilterLogic.Or : FilterLogic.And, order, UsesPrimaryKey && spatial is null, PageSize, 0, null,
+            null, spatial);
         return true;
     }
 

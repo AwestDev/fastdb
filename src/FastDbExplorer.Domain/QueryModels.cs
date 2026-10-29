@@ -44,7 +44,16 @@ public sealed record PageRequest(
     int PageSize,
     long Offset,
     object?[]? AfterKey,
-    IReadOnlyList<FilterCondition>? RequiredFilters = null);
+    IReadOnlyList<FilterCondition>? RequiredFilters = null,
+    SpatialCondition? Spatial = null);
+
+/// <summary>
+/// A nearby condition, AND-ed with the other filters: rows within RadiusMeters of the point, nearest first.
+/// Column names are resolved by the caller; a geography column wins when present.
+/// </summary>
+public sealed record SpatialCondition(
+    string? GeographyColumn, string? LatitudeColumn, string? LongitudeColumn,
+    double Latitude, double Longitude, double RadiusMeters);
 
 public sealed record PageResult(
     IReadOnlyList<string> Columns,

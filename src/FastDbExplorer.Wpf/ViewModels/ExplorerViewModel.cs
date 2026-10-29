@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FastDbExplorer.Application.Abstractions;
 using FastDbExplorer.Domain;
+using FastDbExplorer.Infrastructure;
 using FastDbExplorer.Wpf.Localization;
 using FastDbExplorer.Wpf.Services;
 
@@ -33,29 +35,85 @@ public sealed partial class ExplorerViewModel : ObservableObject
         SelectedDatabase = Databases.FirstOrDefault();
     }
 
-    /// <summary>The point handed over from the map for a nearby search. Shown in the banner while set.</summary>
-    [ObservableProperty] private bool _isSearchPointSet;
+    // ---- nearby search point: entered by hand or handed over from the map --------------------------------------
+
+    [ObservableProperty] private string _searchLatitudeText = "";
+    [ObservableProperty] private string _searchLongitudeText = "";
+    [ObservableProperty] private string _searchRadiusText = "1000";
+    [ObservableProperty] private string _searchError = "";
     [ObservableProperty] private string _searchPointText = "";
-    [ObservableProperty] private double _searchRadiusMeters = 1000;
+    private SearchPoint? _searchPoint;
 
-    public double? SearchLatitude { get; private set; }
-    public double? SearchLongitude { get; private set; }
-
+    /// <summary>A point chosen on the map. Keeps the radius the user already set.</summary>
     public void ApplySearchPoint(double latitude, double longitude)
     {
-        SearchLatitude = latitude;
-        SearchLongitude = longitude;
-        SearchPointText = FormattableString.Invariant($"{latitude:F6}, {longitude:F6}");
-        IsSearchPointSet = true;
+        if (!TryParseRadius(out var radius)) return;
+        SetSearchPoint(new SearchPoint(latitude, longitude, radius));
+    }
+
+    [RelayCommand]
+    private void ApplyManualPoint()
+    {
+        if (!TryParseCoordinates(out var latitude, out var longitude) || !TryParseRadius(out var radius)) return;
+        SetSearchPoint(new SearchPoint(latitude, longitude, radius));
     }
 
     [RelayCommand]
     private void ClearSearchPoint()
     {
-        SearchLatitude = null;
-        SearchLongitude = null;
-        SearchPointText = "";
-        IsSearchPointSet = false;
+        SearchLatitudeText = "";
+        SearchLongitudeText = "";
+        SearchError = "";
+        SetSearchPoint(null);
+    }
+
+    private void SetSearchPoint(SearchPoint? point)
+    {
+        _searchPoint = point;
+        if (point is null)
+        {
+            SearchPointText = "";
+        }
+        else
+        {
+            SearchLatitudeText = FormattableString.Invariant($"{point.Latitude:F6}");
+            SearchLongitudeText = FormattableString.Invariant($"{point.Longitude:F6}");
+            SearchRadiusText = FormattableString.Invariant($"{point.RadiusMeters:F0}");
+            SearchPointText = FormattableString.Invariant($"نتایج نزدیک {point.Latitude:F6}, {point.Longitude:F6} در شعاع {point.RadiusMeters:F0} متر");
+        }
+        Query?.SetSearchPoint(point);
+    }
+
+    private bool TryParseCoordinates(out double latitude, out double longitude)
+    {
+        latitude = 0;
+        longitude = 0;
+        if (!double.TryParse(SearchLatitudeText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out latitude)
+            || latitude < -90 || latitude > 90)
+        {
+            SearchError = "عرض جغرافیایی باید عددی بین -90 و 90 باشد.";
+            return false;
+        }
+        if (!double.TryParse(SearchLongitudeText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out longitude)
+            || longitude < -180 || longitude > 180)
+        {
+            SearchError = "طول جغرافیایی باید عددی بین -180 و 180 باشد.";
+            return false;
+        }
+        SearchError = "";
+        return true;
+    }
+
+    private bool TryParseRadius(out double radius)
+    {
+        if (!double.TryParse(SearchRadiusText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out radius)
+            || radius <= 0 || radius > SpatialSearch.MaxRadiusMeters)
+        {
+            SearchError = "شعاع باید عددی بین ۱ و ۵۰۰٬۰۰۰ متر باشد.";
+            return false;
+        }
+        SearchError = "";
+        return true;
     }
 
     public event Action? Disconnected;
@@ -83,6 +141,7 @@ public sealed partial class ExplorerViewModel : ObservableObject
         if (value is null || SelectedDatabase is null) { Query = null; return; }
         var query = new TableQueryViewModel(_metadata, _settings, SelectedDatabase.Name, value, _dialogs, _queryReportWriter);
         query.ShowSelectedRowsOnMapRequested += (name, points) => ShowSelectedRowsOnMapRequested?.Invoke(name, points);
+        query.SetSearchPoint(_searchPoint); // a point already chosen applies to the new table too
         Query = query;
         _ = query.InitializeAsync();
     }

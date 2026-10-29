@@ -112,6 +112,7 @@ public static class Strings
     public const string ErrNoColumns = "حداقل یک ستون را انتخاب کنید.";
     public const string ErrIncompleteFilter = "یکی از فیلترها ناقص است؛ ستون و مقدار را کامل کنید یا آن را حذف کنید.";
     public const string ErrPickOrder = "برای صفحه‌بندی یک ستون مرتب‌سازی انتخاب کنید.";
+    public const string ErrNoCoordinateColumns = "این جدول ستون مختصات (عرض و طول یا geography) ندارد؛ جستجوی نزدیک نقطه روی آن ممکن نیست.";
     public const string ErrInvalidQuery = "درخواست نامعتبر: ";
 
     public const string Map = "نقشه";

@@ -29,8 +29,8 @@ const hue = (name) => { let h = 0; for (const c of name) h = (h * 31 + c.charCod
 const PALETTE = {
   dark:  { water: '#1B3550', waterway: '#2A4D70', landcover: '#15241F', landuse: '#1A2A38', park: '#17302A',
            transportation: '#3A4A66', building: '#262F45', aeroway: '#33405C' },
-  light: { water: '#B9D7EE', waterway: '#9CC6E6', landcover: '#DCE9DC', landuse: '#E4EAF2', park: '#D3E8D3',
-           transportation: '#B8C2D3', building: '#D5DBE6', aeroway: '#C4CCDB' },
+  light: { water: '#B5D8F0', waterway: '#9ACBEB', landcover: '#E1EBDA', landuse: '#E8EBF0', park: '#D5E8C8',
+           transportation: '#FFFFFF', building: '#D9DDE4', aeroway: '#FFFFFF' },
 };
 const colorOf = (name, dark) => {
   const p = dark ? PALETTE.dark : PALETTE.light;
@@ -43,7 +43,7 @@ function buildStyle(i, dark) {
   const tiles = ['https://tiles.local/{z}/{x}/{y}'];
   // No "bounds" on the source: it would stop MapLibre from asking for tiles outside it (e.g. wide low-zoom tiles).
   const common = { tiles, minzoom: i.minZoom, maxzoom: i.maxZoom };
-  const layers = [{ id: 'bg', type: 'background', paint: { 'background-color': dark ? '#0E1220' : '#EDEFF5' } }];
+  const layers = [{ id: 'bg', type: 'background', paint: { 'background-color': dark ? '#0E1220' : '#E9ECF1' } }];
   const sources = {};
 
   if (i.kind === 'raster') {
@@ -56,7 +56,7 @@ function buildStyle(i, dark) {
       const c = colorOf(name, dark);
       const base = { source: 'map', 'source-layer': name };
       layers.push({ ...base, id: name + '|fill', type: 'fill',
-        filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': c, 'fill-opacity': 0.55 } });
+        filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': c, 'fill-opacity': dark ? 0.55 : 0.85 } });
       layers.push({ ...base, id: name + '|line', type: 'line',
         filter: ['any', ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'Polygon']],
         paint: { 'line-color': c, 'line-width': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 14, 1.4, 18, 3] } });

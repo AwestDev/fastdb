@@ -183,10 +183,9 @@ public partial class MapView : UserControl
         WebGate.Release();
     }
 
-    /// <summary>The shell shows this (already running) view again. A theme change in the meantime needs the map style rebuilt.</summary>
+    /// <summary>The shell shows this (already running) view again. The basemap is a fixed light style, so nothing to refresh.</summary>
     internal void OnShown()
     {
-        if (_pageReady && !_released && _viewModel?.Source is not null && ThemeService.IsDark() != _pageDark) PushSource();
     }
 
     /// <summary>Opens the map in its own window. Both windows share this view model; this copy is released meanwhile.</summary>
@@ -478,7 +477,8 @@ public partial class MapView : UserControl
         if (!_pageReady || _viewModel?.Source is not { } source) return;
         var info = source.Info;
         var saved = _viewModel.LastView;
-        var dark = ThemeService.IsDark();
+        // Fixed light basemap: the app's dark theme does not change the map colours.
+        const bool dark = false;
         _pageDark = dark;
         Post(new
         {

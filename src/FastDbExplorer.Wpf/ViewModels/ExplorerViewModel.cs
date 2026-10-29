@@ -33,8 +33,10 @@ public sealed partial class ExplorerViewModel : ObservableObject
         SelectedDatabase = Databases.FirstOrDefault();
     }
 
-    /// <summary>Text shown in the explorer for the point handed over from the map ("lat, lon"), a dash when none.</summary>
-    [ObservableProperty] private string _searchPointText = "—";
+    /// <summary>The point handed over from the map for a nearby search. Shown in the banner while set.</summary>
+    [ObservableProperty] private bool _isSearchPointSet;
+    [ObservableProperty] private string _searchPointText = "";
+    [ObservableProperty] private double _searchRadiusMeters = 1000;
 
     public double? SearchLatitude { get; private set; }
     public double? SearchLongitude { get; private set; }
@@ -44,6 +46,16 @@ public sealed partial class ExplorerViewModel : ObservableObject
         SearchLatitude = latitude;
         SearchLongitude = longitude;
         SearchPointText = FormattableString.Invariant($"{latitude:F6}, {longitude:F6}");
+        IsSearchPointSet = true;
+    }
+
+    [RelayCommand]
+    private void ClearSearchPoint()
+    {
+        SearchLatitude = null;
+        SearchLongitude = null;
+        SearchPointText = "";
+        IsSearchPointSet = false;
     }
 
     public event Action? Disconnected;

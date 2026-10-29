@@ -79,13 +79,18 @@
         <TextBlock Text="{x:Static l:Strings.EmptySubtitle}" Style="{StaticResource Muted}" TextAlignment="Center" />
       </StackPanel>
     </Grid>
-    <!-- Point handed over from the map (search-near-point). The search itself is added next. -->
-    <Border Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Padding="14,6"
-            CornerRadius="10" Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
->
-      <TextBlock FontSize="12" Foreground="{DynamicResource MutedBrush}">
-        <Run Text="نقطه‌ی جستجو:" /><Run Text="{Binding SearchPointText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
-      </TextBlock>
+    <!-- Point handed over from the map. Radius and search come next; here the point can be checked and cleared. -->
+    <Border Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,12,0,0" Padding="16,8"
+            CornerRadius="12" Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+            Visibility="{Binding IsSearchPointSet, Converter={StaticResource BoolToVis}}">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="نقطه‌ی جستجو:" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding SearchPointText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
+                   VerticalAlignment="Center" Margin="6,0,18,0" />
+        <TextBlock Text="شعاع (متر):" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+        <TextBox Text="{Binding SearchRadiusMeters, UpdateSourceTrigger=PropertyChanged}" Width="90" Margin="6,0,18,0" />
+        <Button Content="پاک کردن نقطه" Command="{Binding ClearSearchPointCommand}" Padding="10,4" />
+      </StackPanel>
     </Border>
   </Grid>
 </UserControl>

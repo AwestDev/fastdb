@@ -22,7 +22,7 @@
   const T = {
     placeholder: 'Latitude, longitude', example: 'Example: 35.7219, 51.3347', go: 'Go to coordinates', pick: 'Get coordinates from the map',
     measure: 'Measure distance', clear: 'Clear', copy: 'Copy', copied: 'Copied', copyBoth: 'Copy coordinates',
-    lat: 'Latitude', lng: 'Longitude', pointTitle: 'Point coordinates', addPoint: 'Add to my points', searchHere: 'Search near this point',
+    lat: 'Latitude', lng: 'Longitude', pointTitle: 'Point coordinates', addPoint: 'Add to my points', searchHere: 'جستجو در نزدیکی این نقطه',
     namePlaceholder: 'Name (optional)', measureFrom: 'Measure from here', measureTitle: 'Measure distance',
     total: 'Total distance', points: 'points', lastSegment: 'Last segment',
     hintStart: 'Click the map to place the first point.',

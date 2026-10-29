@@ -58,7 +58,7 @@
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
-      <Setter Property="Margin" Value="0,0,0,6" />
+      <Setter Property="Margin" Value="0,0,0,18" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">

@@ -25,7 +25,17 @@ let map = null, info = null, pendingMove = false;
 const IRAN_VIEW = { center: [53.688, 32.428], zoom: 4.7 };
 
 const hue = (name) => { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; };
-const colorOf = (name, dark) => `hsl(${hue(name)}, 62%, ${dark ? 62 : 42}%)`;
+// Fixed, muted colours per OpenMapTiles layer (instead of a random hue per name).
+const PALETTE = {
+  dark:  { water: '#1B3550', waterway: '#2A4D70', landcover: '#15241F', landuse: '#1A2A38', park: '#17302A',
+           transportation: '#3A4A66', building: '#262F45', aeroway: '#33405C' },
+  light: { water: '#B9D7EE', waterway: '#9CC6E6', landcover: '#DCE9DC', landuse: '#E4EAF2', park: '#D3E8D3',
+           transportation: '#B8C2D3', building: '#D5DBE6', aeroway: '#C4CCDB' },
+};
+const colorOf = (name, dark) => {
+  const p = dark ? PALETTE.dark : PALETTE.light;
+  return p[name] || `hsl(${hue(name)}, 18%, ${dark ? 28 : 78}%)`;
+};
 
 // Generic style: every vector layer gets a fill (polygons), a line (lines + polygon outlines) and a circle (points),
 // so ANY vector file is drawn without knowing its schema. Layer ids: "<layer>|fill|line|circle".
@@ -46,7 +56,7 @@ function buildStyle(i, dark) {
       const c = colorOf(name, dark);
       const base = { source: 'map', 'source-layer': name };
       layers.push({ ...base, id: name + '|fill', type: 'fill',
-        filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': c, 'fill-opacity': 0.4 } });
+        filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': c, 'fill-opacity': 0.55 } });
       layers.push({ ...base, id: name + '|line', type: 'line',
         filter: ['any', ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'Polygon']],
         paint: { 'line-color': c, 'line-width': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 14, 1.4, 18, 3] } });

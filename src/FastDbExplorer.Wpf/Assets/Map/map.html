@@ -42,6 +42,7 @@ function buildStyle(i, dark) {
   } else {
     sources.map = { type: 'vector', ...common };
     for (const name of i.layers) {
+      if (name === 'boundary') { addBoundaries(layers, dark); continue; }
       const c = colorOf(name, dark);
       const base = { source: 'map', 'source-layer': name };
       layers.push({ ...base, id: name + '|fill', type: 'fill',
@@ -57,6 +58,25 @@ function buildStyle(i, dark) {
   if (i.kind !== 'raster') addLabels(layers, i.layers, dark);
   // Fonts are plain files in Assets/Map/fonts/<n>/<range>.pbf (downloaded by setup-map-assets.cmd), no internet at run time.
   return { version: 8, glyphs: 'https://app.local/fonts/{fontstack}/{range}.pbf', sources, layers };
+}
+
+// Borders by admin_level (OpenMapTiles): countries (2) strong, provinces (3+) thin and dashed, disputed lines dotted.
+function addBoundaries(layers, dark) {
+  const base = { source: 'map', 'source-layer': 'boundary' };
+  const country = dark ? '#E8ECF8' : '#1B2033';
+  const province = dark ? 'rgba(160,178,210,0.6)' : 'rgba(60,70,95,0.5)';
+  const lines = ['==', ['geometry-type'], 'LineString'];
+  layers.push({ ...base, id: 'boundary|country', type: 'line',
+    filter: ['all', lines, ['<=', ['get', 'admin_level'], 2], ['!=', ['get', 'disputed'], 1]],
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': country, 'line-width': ['interpolate', ['linear'], ['zoom'], 0, 1.2, 6, 2, 12, 3] } });
+  layers.push({ ...base, id: 'boundary|disputed', type: 'line',
+    filter: ['all', lines, ['==', ['get', 'disputed'], 1]],
+    paint: { 'line-color': country, 'line-width': 1.5, 'line-dasharray': [1.5, 2] } });
+  layers.push({ ...base, id: 'boundary|province', type: 'line', minzoom: 3,
+    filter: ['all', lines, ['>', ['get', 'admin_level'], 2]],
+    paint: { 'line-color': province, 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 10, 1.2],
+      'line-dasharray': [3, 2] } });
 }
 
 // Text labels for OpenMapTiles-style vector files (place, roads, water, poi ...). Layers that a file lacks are skipped.
@@ -84,7 +104,8 @@ function addLabels(layers, names, dark) {
   };
   const rank = { 'symbol-sort-key': ['coalesce', ['get', 'rank'], 100] };
 
-  add('country', 'place', 1, 8, ['==', ['get', 'class'], 'country'], { ...rank, 'text-size': zoomSize(1, 11, 6, 17) });
+  add('country', 'place', 1, 8, ['==', ['get', 'class'], 'country'],
+    { ...rank, 'text-transform': 'uppercase', 'text-letter-spacing': 0.1, 'text-size': zoomSize(1, 12, 6, 19) });
   add('state', 'place', 4, 9, inList('class', ['state', 'province']), { ...rank, 'text-size': zoomSize(4, 11, 8, 14) });
   add('city', 'place', 4, null, ['==', ['get', 'class'], 'city'], { ...rank, 'text-size': zoomSize(4, 11, 10, 16, 14, 20) });
   add('town', 'place', 7, null, ['==', ['get', 'class'], 'town'], { ...rank, 'text-size': zoomSize(7, 10, 12, 15) });
@@ -101,7 +122,9 @@ function addLabels(layers, names, dark) {
   add('river', 'waterway', 11, null, null, { ...onLine, 'text-size': 11 }, water);
   add('water', 'water_name', 2, null, null, { 'text-size': zoomSize(2, 11, 10, 14) }, water);
   add('airport', 'aerodrome_label', 8, null, null, { 'text-size': 11 });
-  add('peak', 'mountain_peak', 7, null, null, { 'text-size': 10, 'text-anchor': 'top', 'text-offset': [0, 0.5] });
+  add('peak', 'mountain_peak', 9, null, null,
+    { 'text-field': ['case', ['has', 'ele'], ['concat', NAME, ' · ', ['to-string', ['get', 'ele']], ' m'], NAME],
+      'text-size': 10, 'text-anchor': 'top', 'text-offset': [0, 0.5] });
   add('poi', 'poi', 15, null, null, { 'text-size': 10, 'text-anchor': 'top', 'text-offset': [0, 0.6] });
   add('number', 'housenumber', 17, null, null, { 'text-field': ['get', 'housenumber'], 'text-size': 9 });
 }

@@ -91,6 +91,12 @@
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
           <Image Source="pack://application:,,,/Assets/app.ico" Width="18" Height="18" RenderOptions.BitmapScalingMode="HighQuality" />
           <TextBlock Text="{x:Static l:WindowStrings.AppName}" FontSize="13" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
+          <ComboBox x:Name="ThemeCombo" Width="128" Margin="20,0,0,0" VerticalAlignment="Center" FontSize="12" Padding="8,2"
+                    WindowChrome.IsHitTestVisibleInChrome="True" SelectionChanged="OnThemeSelected" ToolTip="انتخاب تم">
+            <ComboBoxItem Content="تیره" />
+            <ComboBoxItem Content="روشن" />
+            <ComboBoxItem Content="مطابق سیستم" />
+          </ComboBox>
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal">
           <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" ToolTip="{x:Static l:WindowStrings.Minimize}" Click="OnMinimize" />

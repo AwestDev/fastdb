@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        ThemeCombo.SelectedIndex = (int)ThemeService.Mode;
         DataContext = viewModel;
         SourceInitialized += (_, _) => ThemeService.SetDarkTitleBar(this, ThemeService.IsDark());
         StateChanged += (_, _) => UpdateMaximizeState();
@@ -137,5 +138,10 @@ public partial class MainWindow : Window
         RootGrid.Margin = maximized ? SystemParameters.WindowResizeBorderThickness : new Thickness(0);
         MaxRestoreButton.Content = maximized ? "\uE923" : "\uE922";
         MaxRestoreButton.ToolTip = maximized ? WindowStrings.Restore : WindowStrings.Maximize;
+    }
+
+    private void OnThemeSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (ThemeCombo.SelectedIndex >= 0) ThemeService.SetMode((ThemeMode)ThemeCombo.SelectedIndex);
     }
 }

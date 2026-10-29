@@ -20,7 +20,7 @@ public partial class App : System.Windows.Application
 {
     private const int StartupSteps = 3;
     // The splash stays at least this long, otherwise it would only flash on a fast machine.
-    private static readonly TimeSpan MinSplashTime = TimeSpan.FromMilliseconds(1200);
+    private static readonly TimeSpan MinSplashTime = TimeSpan.FromMilliseconds(4000);
 
     private IHost? _host;
     private ThemeService? _theme;

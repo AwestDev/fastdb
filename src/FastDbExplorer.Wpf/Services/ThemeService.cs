@@ -39,7 +39,9 @@ public sealed class ThemeService : IDisposable
 
     private static void Apply()
     {
-        var dark = IsDark();
+        // The approved design (minimal layout + dark palette) is the only theme. Restore the Windows
+        // setting by replacing this line with: var dark = IsDark();
+        var dark = true;
         // Index 0 of the merged dictionaries is always the colour theme (see App.xaml).
         WpfApp.Current.Resources.MergedDictionaries[0] = new ResourceDictionary
         {

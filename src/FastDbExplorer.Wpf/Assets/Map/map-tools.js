@@ -390,9 +390,12 @@
     const addRow = el('div', 'mt-row mt-add');
     addRow.append(name, textButton(T.addPoint, 'mt-gbtn', add));
     c.appendChild(addRow);
-    c.appendChild(textButton(T.searchHere, 'mt-gbtn', () => post({ type: 'toolSearchNearby', lat: temp.lat, lng: temp.lng })));
-
-    c.appendChild(textButton(T.measureFrom, 'mt-link', () => { const p = [temp.lng, temp.lat]; temp = null; startMeasure(p); }));
+    // Two equal actions side by side: measuring from this point, and searching around it in the Explorer.
+    const actions = el('div', 'mt-row');
+    actions.append(
+      textButton(T.measureFrom, 'mt-gbtn', () => { const p = [temp.lng, temp.lat]; temp = null; startMeasure(p); }),
+      textButton(T.searchHere, 'mt-gbtn', () => post({ type: 'toolSearchNearby', lat: temp.lat, lng: temp.lng })));
+    c.appendChild(actions);
   }
 
   function cardManual(c) {

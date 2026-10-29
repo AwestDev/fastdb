@@ -68,6 +68,11 @@ public sealed partial class MapViewModel : ObservableObject
     public event Action<string, bool>? LayerToggled;
     public event Action? FitRequested;
 
+    /// <summary>The user chose "search near this point" on a map point. Listeners open the Explorer with that point.</summary>
+    public event Action<double, double>? SpatialSearchRequested;
+
+    public void RequestSpatialSearch(double latitude, double longitude) => SpatialSearchRequested?.Invoke(latitude, longitude);
+
     /// <summary>A coordinate layer was added, or its data/radius/style changed: the view (re)sends it to the page.</summary>
     public event Action<MapLayer>? CoordinateLayerChanged;
     public event Action<Guid, bool>? CoordinateLayerVisibilityChanged;

@@ -79,5 +79,13 @@
         <TextBlock Text="{x:Static l:Strings.EmptySubtitle}" Style="{StaticResource Muted}" TextAlignment="Center" />
       </StackPanel>
     </Grid>
+    <!-- Point handed over from the map (search-near-point). The search itself is added next. -->
+    <Border Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Padding="14,6"
+            CornerRadius="10" Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+>
+      <TextBlock FontSize="12" Foreground="{DynamicResource MutedBrush}">
+        <Run Text="نقطه‌ی جستجو:" /><Run Text="{Binding SearchPointText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+      </TextBlock>
+    </Border>
   </Grid>
 </UserControl>

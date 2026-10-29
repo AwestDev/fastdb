@@ -51,6 +51,11 @@ public partial class MapView
             case "toolDeletePoint":
                 if (Guid.TryParse(Text(root, "pointId"), out var pointId)) _ = _viewModel.RemoveManualPointAsync(pointId);
                 return true;
+            case "toolSearchNearby":
+                if (root.TryGetProperty("lat", out var searchLat) && searchLat.TryGetDouble(out var sLat)
+                    && root.TryGetProperty("lng", out var searchLng) && searchLng.TryGetDouble(out var sLng))
+                    _viewModel.RequestSpatialSearch(sLat, sLng);
+                return true;
             case "toolZoomResult":
                 _viewModel.ZoomToQueryResult(Guid.TryParse(Text(root, "id"), out var zoomId) ? zoomId : null);
                 return true;

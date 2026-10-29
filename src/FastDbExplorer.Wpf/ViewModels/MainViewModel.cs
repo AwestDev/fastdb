@@ -74,6 +74,7 @@ public sealed partial class MainViewModel : ObservableObject
         _connection.ProfileDeleted += OnProfileDeleted;
         _connection.Profiles.CollectionChanged += (_, _) => RefreshActiveProfile();
         _map.BackRequested += () => Navigate(AppSection.Home);
+        _map.SpatialSearchRequested += OnMapSpatialSearch;
 
         Navigate(AppSection.Connections);
     }
@@ -163,6 +164,12 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         return new CommandPaletteViewModel(items);
+    }
+
+    private void OnMapSpatialSearch(double latitude, double longitude)
+    {
+        Explorer?.ApplySearchPoint(latitude, longitude);
+        Navigate(AppSection.Explorer);
     }
 
     private object ResolveView(AppSection section)

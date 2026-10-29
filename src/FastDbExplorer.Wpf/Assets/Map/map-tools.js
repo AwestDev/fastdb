@@ -22,7 +22,7 @@
   const T = {
     placeholder: 'Latitude, longitude', example: 'Example: 35.7219, 51.3347', go: 'Go to coordinates', pick: 'Get coordinates from the map',
     measure: 'Measure distance', clear: 'Clear', copy: 'Copy', copied: 'Copied', copyBoth: 'Copy coordinates',
-    lat: 'Latitude', lng: 'Longitude', pointTitle: 'Point coordinates', addPoint: 'Add to my points',
+    lat: 'Latitude', lng: 'Longitude', pointTitle: 'Point coordinates', addPoint: 'Add to my points', searchHere: 'Search near this point',
     namePlaceholder: 'Name (optional)', measureFrom: 'Measure from here', measureTitle: 'Measure distance',
     total: 'Total distance', points: 'points', lastSegment: 'Last segment',
     hintStart: 'Click the map to place the first point.',
@@ -390,6 +390,7 @@
     const addRow = el('div', 'mt-row mt-add');
     addRow.append(name, textButton(T.addPoint, 'mt-gbtn', add));
     c.appendChild(addRow);
+    c.appendChild(textButton(T.searchHere, 'mt-gbtn', () => post({ type: 'toolSearchNearby', lat: temp.lat, lng: temp.lng })));
 
     c.appendChild(textButton(T.measureFrom, 'mt-link', () => { const p = [temp.lng, temp.lat]; temp = null; startMeasure(p); }));
   }

@@ -33,6 +33,19 @@ public sealed partial class ExplorerViewModel : ObservableObject
         SelectedDatabase = Databases.FirstOrDefault();
     }
 
+    /// <summary>Text shown in the explorer for the point handed over from the map ("lat, lon"), a dash when none.</summary>
+    [ObservableProperty] private string _searchPointText = "—";
+
+    public double? SearchLatitude { get; private set; }
+    public double? SearchLongitude { get; private set; }
+
+    public void ApplySearchPoint(double latitude, double longitude)
+    {
+        SearchLatitude = latitude;
+        SearchLongitude = longitude;
+        SearchPointText = FormattableString.Invariant($"{latitude:F6}, {longitude:F6}");
+    }
+
     public event Action? Disconnected;
     public event Action? OpenMapRequested;
     public event Action? OpenMonitoringRequested;

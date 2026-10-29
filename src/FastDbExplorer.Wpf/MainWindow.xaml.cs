@@ -142,6 +142,6 @@ public partial class MainWindow : Window
 
     private void OnThemeSelected(object sender, SelectionChangedEventArgs e)
     {
-        if (ThemeCombo.SelectedIndex >= 0) ThemeService.SetMode((ThemeMode)ThemeCombo.SelectedIndex);
+        if (ThemeCombo.SelectedIndex >= 0) ThemeService.SetMode((FastDbExplorer.Wpf.Services.ThemeMode)ThemeCombo.SelectedIndex);
     }
 }
